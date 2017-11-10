@@ -59,7 +59,9 @@ protected:
 };
 
 class Component;
+class ComponentContainer;
 class MenuComponent;
+class Button;
 
 class SDL_IO: public SDLBaseIO, public Publisher<SDL_IO> {
 public:
@@ -85,6 +87,11 @@ public:
     void drawComponent(const Component& c);
     void setColor(int rgba);
 
+    const std::unique_ptr<ComponentContainer>& getRoot()
+    {
+        return rootComponent;
+    }
+
     bool handleEvents();
 
     void setWidth(int w) noexcept;
@@ -96,12 +103,15 @@ public:
     Uint32 getTicks();
 
     std::unique_ptr<MenuComponent> createMenuComponent(int x, int y, int width, int height);
+    std::unique_ptr<Button> createButton(int x, int y, int width, int height);
 
 private:
     WindowPointer window;
     RendererPointer renderer;
     TexturePointer screenTexture;
     SurfacePointer buffer;
+
+    std::unique_ptr<ComponentContainer> rootComponent;
 
     std::map<std::string, SDL_Surface *> texMap;
 

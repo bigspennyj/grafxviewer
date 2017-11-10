@@ -1,5 +1,4 @@
 #include "io.h"
-
 #include "component.h"
 #include <iostream>
 
@@ -9,6 +8,7 @@ SDL_IO::SDL_IO(int width, int height)
       renderer(nullptr, SDL_DestroyRenderer),
       screenTexture(nullptr, SDL_DestroyTexture),
       buffer(nullptr, SDL_FreeSurface),
+      rootComponent(new ComponentContainer(*this, 0, 0, width, height, nullptr)),
       texMap(),
       screenWidth(width), 
       screenHeight(height),
@@ -48,6 +48,12 @@ std::unique_ptr<MenuComponent> SDL_IO::createMenuComponent(int x, int y, int w, 
 {
     SurfacePointer surf(SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000), SDL_FreeSurface);
     return std::unique_ptr<MenuComponent>(new MenuComponent(*this, x, y, w, h, std::move(surf)));
+}
+
+std::unique_ptr<Button> SDL_IO::createButton(int x, int y, int w, int h)
+{
+    SurfacePointer surf(SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000), SDL_FreeSurface);
+    return std::unique_ptr<Button>(new Button(*this, x, y, w, h, std::move(surf)));
 }
 
 int SDL_IO::getWidth() const noexcept
@@ -129,6 +135,8 @@ void SDL_IO::drawRectangle(SurfacePointerBorrow s, int x1, int y1, int x2, int y
 
 void SDL_IO::updateScreen()
 {
+    rootComponent->invalidate();
+    rootComponent->update();
     SDL_UpdateTexture(screenTexture.get(), nullptr, buffer->pixels, buffer->pitch);
     SDL_RenderCopy(renderer.get(), screenTexture.get(), nullptr, nullptr);
     SDL_RenderPresent(renderer.get());
