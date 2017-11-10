@@ -4,7 +4,7 @@
 #include <iostream>
 
 App::App() :
-    io(new SDL_IO(640, 480)),
+    io(new SDL_IO(800, 600)),
     run(true),
     leftBackground(0xffffffff)
 {
@@ -19,8 +19,13 @@ void App::notify()
 int App::execute()
 {
     Uint32 delayTime = (1.0 / FRAME_RATE) * 1000;
-    auto menu = io->createMenuComponent(0, 380, 640, 100);
+    // temporary initialization section
+    auto menu = io->createMenuComponent(0, 500, 800, 100);
 
+    auto button = io->createButton(25, 25, 50, 50);
+    menu->addChild(std::move(button));
+
+    io->getRoot()->addChild(std::move(menu));
     while (run) {
         Uint32 startTicks = io->getTicks();
         run = io->handleEvents();
@@ -32,7 +37,6 @@ int App::execute()
 
         io->setColor(0xff666666);
 
-        menu->update();
         io->updateScreen();
 
         Uint32 ticksElapsed = io->getTicks() - startTicks;
