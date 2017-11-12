@@ -5,17 +5,17 @@
 #include <string>
 #include <iostream>
 
-#include "io.h"
+#include "drawingcontext.h"
 
 class Component {
 public:
-    Component(SDL_IO& ioRef, int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer s) :
-        x(x_), y(y_), width(width_), height(height_), needUpdate(true), io(ioRef), surface(std::move(s)) {}
+    Component(int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer s) :
+        x(x_), y(y_), width(width_), height(height_), needUpdate(true), surface(std::move(s)) {}
 
     virtual ~Component() { std::cout << "~COMPONENT" << std::endl; }
 
-    virtual void update();
-    virtual void redraw() = 0;
+    virtual void update(const DrawingContext& c);
+    virtual void redraw(const DrawingContext& c) = 0;
     virtual bool handleEvent(const SDL_IO::EventArgs& e) = 0;
 
     int X() const noexcept { return x; }
@@ -41,20 +41,19 @@ protected:
             && (y_ >= y && y_ <= y + height);
     }
 
-    SDL_IO& io;
-
     SDL_IO::SurfacePointer surface;
 };
 
 class ComponentContainer : public Component {
 public:
-    ComponentContainer(SDL_IO& ioref, int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer s)
-        : Component(ioref, x_, y_, width_, height_, std::move(s)) {}
+    ComponentContainer(int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer s)
+        : Component(x_, y_, width_, height_, std::move(s)) {}
 
     virtual ~ComponentContainer() {}
 
-    virtual void update() override;
-    virtual void redraw() override {}
+    virtual void update(DrawingContext&&);
+    virtual void update(const DrawingContext&) override;
+    virtual void redraw(const DrawingContext&) override {}
 
     virtual bool handleEvent(const SDL_IO::EventArgs& e) override
     {
@@ -90,13 +89,13 @@ protected:
 
 class Button : public Component {
 public:
-    Button(SDL_IO& ioref, int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer sp)
-        : Component(ioref, x_, y_, width_, height_, std::move(sp)), buttonText()
+    Button(int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer sp)
+        : Component(x_, y_, width_, height_, std::move(sp)), buttonText()
     {
     }
     virtual ~Button() {}
 
-    virtual void redraw() override;
+    virtual void redraw(const DrawingContext& c) override;
     virtual bool handleEvent(const SDL_IO::EventArgs& e) override
     {
         if (AABB(e.x, e.y)) {
@@ -113,13 +112,13 @@ private:
 
 class MenuComponent : public ComponentContainer {
 public:
-    MenuComponent(SDL_IO& ioref, int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer sp)
-        : ComponentContainer(ioref, x_, y_, width_, height_, std::move(sp))
+    MenuComponent(int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer sp)
+        : ComponentContainer(x_, y_, width_, height_, std::move(sp))
     {
     }
     virtual ~MenuComponent() {}
 
-    virtual void redraw() override;
+    virtual void redraw(const DrawingContext& c) override;
 };
 
 #endif //component_h

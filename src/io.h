@@ -125,5 +125,4 @@ private:
     void CycleTexture();
 };
 
-
 #endif //IO_H

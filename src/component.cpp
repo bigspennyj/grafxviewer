@@ -1,38 +1,41 @@
 #include <iostream>
-#include "io.h"
+#include "drawingcontext.h"
 #include "component.h"
 
-void Component::update()
+void Component::update(const DrawingContext& c)
 {
     if (needUpdate) {
-        redraw();
+        redraw(c);
         needUpdate = false;
     }
 }
 
-void ComponentContainer::update()
+void ComponentContainer::update(const DrawingContext& c)
 {
-    Component::update();
+    Component::update(c);
 
     for (const auto& child : children) {
-        child->update();
+        child->update(c);
     }
 }
 
-void MenuComponent::redraw()
+void ComponentContainer::update(DrawingContext&& c)
+{
+    update(c);
+}
+void MenuComponent::redraw(const DrawingContext& c)
 {
     std::cout << "REDRAW" << std::endl;
-    io.setColor(0xff666666);
-    io.drawRectangle(surface, 0, 0, width, height);
-    // TODO: move this up to SDL_IO
-    io.drawComponent(*this);
+    c.setColor(0xff666666);
+    c.drawRectangle(surface, 0, 0, width, height);
+    c.drawComponent(*this);
 }
 
-void Button::redraw()
+void Button::redraw(const DrawingContext& c)
 {
     std::cout << "REDRAW - BUTTON" << std::endl;
-    io.setColor(0xff000000);
-    io.drawRectangle(surface, 0, 0, width, height);
+    c.setColor(0xff000000);
+    c.drawRectangle(surface, 0, 0, width, height);
     // TODO: move this up to SDL_IO
-    io.drawComponent(*this);
+    c.drawComponent(*this);
 }
