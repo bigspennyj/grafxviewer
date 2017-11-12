@@ -16,12 +16,13 @@ public:
 
     virtual void update();
     virtual void redraw() = 0;
+    virtual bool handleEvent(const SDL_IO::EventArgs& e) = 0;
 
     int X() const noexcept { return x; }
     int Y() const noexcept { return y; }
     int Width() const noexcept { return width; }
     int Height() const noexcept { return height; }
-    
+
     void setX(int x_) noexcept { x = x_; }
     void setY(int y_) noexcept { y = y_; }
     void setWidth(int width_) noexcept { x = width_; }
@@ -34,6 +35,11 @@ public:
 protected:
     int x, y, width, height;
     bool needUpdate;
+    bool AABB(const int x_, const int y_) const noexcept
+    {
+        return (x_ >= x && x_ <= x + width)
+            && (y_ >= y && y_ <= y + height);
+    }
 
     SDL_IO& io;
 
@@ -50,6 +56,17 @@ public:
     virtual void update() override;
     virtual void redraw() override {}
 
+    virtual bool handleEvent(const SDL_IO::EventArgs& e) override
+    {
+        for (const auto& child : children) {
+            if (child->handleEvent(e))
+                return true;
+        }
+        if (handleMouseEvent(e))
+            return true;
+        return false;
+    }
+
     template<typename T>
     void addChild(std::unique_ptr<T> c)
     {
@@ -61,24 +78,42 @@ public:
 
 protected:
     std::vector<std::unique_ptr<Component>> children;
+    virtual bool handleMouseEvent(const SDL_IO::EventArgs& e)
+    {
+        if (AABB(e.x, e.y)) {
+            std::cout << "componentcontainer clicked" << std::endl;
+            return true;
+        }
+        return false;
+    }
 };
 
 class Button : public Component {
 public:
-    Button(SDL_IO& ioref, int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer sp) 
+    Button(SDL_IO& ioref, int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer sp)
         : Component(ioref, x_, y_, width_, height_, std::move(sp)), buttonText()
     {
     }
     virtual ~Button() {}
 
     virtual void redraw() override;
+    virtual bool handleEvent(const SDL_IO::EventArgs& e) override
+    {
+        if (AABB(e.x, e.y)) {
+            //handle
+            std::cout << "button clicked!" << std::endl;
+            return true;
+        }
+        return false;
+    }
+
 private:
     std::string buttonText;
 };
 
 class MenuComponent : public ComponentContainer {
 public:
-    MenuComponent(SDL_IO& ioref, int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer sp) 
+    MenuComponent(SDL_IO& ioref, int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer sp)
         : ComponentContainer(ioref, x_, y_, width_, height_, std::move(sp))
     {
     }

@@ -158,7 +158,10 @@ bool SDL_IO::handleEvents()
                 break;
             }
         } else if (e.type == SDL_MOUSEBUTTONDOWN) {
-            notify();
+            EventArgs args{ e.button.x, e.button.y };
+            if (!rootComponent->handleEvent(args))
+                std::cout << "unhandled mouse event" << std::endl;
+            return true;
         }
     }
     return true;

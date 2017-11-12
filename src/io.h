@@ -65,6 +65,9 @@ class Button;
 
 class SDL_IO: public SDLBaseIO, public Publisher<SDL_IO> {
 public:
+    struct EventArgs {
+        int x, y;
+    };
     template<typename T>
     using DeletedPointer = std::unique_ptr<T, std::function<void(T*)>>;
 
