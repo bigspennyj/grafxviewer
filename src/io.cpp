@@ -1,16 +1,17 @@
 #include "io.h"
-
 #include "component.h"
+#include "appcomponent.h"
 #include <iostream>
 
-SDL_IO::SDL_IO(int width, int height) 
+SDL_IO::SDL_IO(int width, int height)
     : SDLBaseIO(),
       window(nullptr, SDL_DestroyWindow),
       renderer(nullptr, SDL_DestroyRenderer),
       screenTexture(nullptr, SDL_DestroyTexture),
       buffer(nullptr, SDL_FreeSurface),
+      rootComponent(new ComponentContainer(0, 0, width, height, nullptr)),
       texMap(),
-      screenWidth(width), 
+      screenWidth(width),
       screenHeight(height),
       currentDrawColor(0)
 {
@@ -39,7 +40,7 @@ SDL_IO::SDL_IO(int width, int height)
 
 void SDL_IO::drawComponent(const Component& c)
 {
-    std::cout << "Drawing component: " << c.X() << " " << c.Y() << " " << c.Width()  << " " << c.Height() << std::endl; 
+    std::cout << "Drawing component: " << c.X() << " " << c.Y() << " " << c.Width()  << " " << c.Height() << std::endl;
     SDL_Rect dest = { c.X(), c.Y(), c.X() + c.Width(), c.Y() + c.Height() };
     SDL_BlitSurface(c.surfPointer(), nullptr, buffer.get(), &dest);
 }
@@ -47,7 +48,13 @@ void SDL_IO::drawComponent(const Component& c)
 std::unique_ptr<MenuComponent> SDL_IO::createMenuComponent(int x, int y, int w, int h)
 {
     SurfacePointer surf(SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000), SDL_FreeSurface);
-    return std::unique_ptr<MenuComponent>(new MenuComponent(*this, x, y, w, h, std::move(surf)));
+    return std::unique_ptr<MenuComponent>(new MenuComponent(x, y, w, h, std::move(surf)));
+}
+
+std::unique_ptr<Button> SDL_IO::createButton(int x, int y, int w, int h)
+{
+    SurfacePointer surf(SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000), SDL_FreeSurface);
+    return std::unique_ptr<Button>(new Button(x, y, w, h, std::move(surf)));
 }
 
 int SDL_IO::getWidth() const noexcept
@@ -120,8 +127,7 @@ void SDL_IO::drawRectangle(int x1, int y1, int x2, int y2)
     SDL_FillRect(buffer.get(), &destRect, currentDrawColor);
 }
 
-using SurfacePointerBorrow = const SDL_IO::SurfacePointer&;
-void SDL_IO::drawRectangle(SurfacePointerBorrow s, int x1, int y1, int x2, int y2)
+void SDL_IO::drawRectangle(const SurfacePointer& s, int x1, int y1, int x2, int y2)
 {
     SDL_Rect destRect = { x1, y1, x2, y2 };
     SDL_FillRect(s.get(), &destRect, currentDrawColor);
@@ -129,6 +135,8 @@ void SDL_IO::drawRectangle(SurfacePointerBorrow s, int x1, int y1, int x2, int y
 
 void SDL_IO::updateScreen()
 {
+    rootComponent->invalidate();
+    rootComponent->update(DrawingContext(*this));
     SDL_UpdateTexture(screenTexture.get(), nullptr, buffer->pixels, buffer->pitch);
     SDL_RenderCopy(renderer.get(), screenTexture.get(), nullptr, nullptr);
     SDL_RenderPresent(renderer.get());
@@ -142,15 +150,23 @@ bool SDL_IO::handleEvents()
         if (e.type == SDL_QUIT)
             return false;
         else if (e.type == SDL_WINDOWEVENT) {
-            switch(e.window.event) { 
-            case SDL_WINDOWEVENT_SIZE_CHANGED: 
-                screenWidth = e.window.data1; 
-                screenHeight = e.window.data2; 
+            switch(e.window.event) {
+            case SDL_WINDOWEVENT_SIZE_CHANGED:
+                screenWidth = e.window.data1;
+                screenHeight = e.window.data2;
                 CycleTexture();
                 break;
             }
         } else if (e.type == SDL_MOUSEBUTTONDOWN) {
-            notify();
+            EventArgs args{ e.button.x, e.button.y, true };
+            if (!rootComponent->handleEvent(args))
+                std::cout << "unhandled mouse event" << std::endl;
+            return true;
+        } else if (e.type == SDL_MOUSEBUTTONUP) {
+            EventArgs args{ e.button.x, e.button.y, false };
+            if (!rootComponent->handleEvent(args))
+                std::cout << "unhandled mouse event" << std::endl;
+            return true;
         }
     }
     return true;

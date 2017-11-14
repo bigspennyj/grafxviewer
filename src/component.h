@@ -1,71 +1,79 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-#include <map>
+#include <vector>
 #include <string>
 #include <iostream>
 
-#include "io.h"
+#include "drawingcontext.h"
 
 class Component {
 public:
-    Component(SDL_IO& ioRef, int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer s) :
-        x(x_), y(y_), width(width_), height(height_), needUpdate(true), io(ioRef), surface(std::move(s)) {}
+    using ClickHandler = std::function<void(const SDL_IO::EventArgs&)>;
 
-    virtual ~Component() { std::cout << "~COMPONENT" << std::endl; }
+    Component(int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer s) :
+        x(x_), y(y_), width(width_), height(height_), needUpdate(true), surface(std::move(s)) {}
 
-    virtual void update();
-    virtual void redraw() = 0;
+    virtual ~Component() { }
+
+    virtual void update(const DrawingContext& c);
+    virtual void redraw(const DrawingContext& c) = 0;
+    virtual bool handleEvent(const SDL_IO::EventArgs& e) = 0;
 
     int X() const noexcept { return x; }
     int Y() const noexcept { return y; }
     int Width() const noexcept { return width; }
     int Height() const noexcept { return height; }
+
+    void setX(int x_) noexcept { x = x_; }
+    void setY(int y_) noexcept { y = y_; }
+    void setWidth(int width_) noexcept { x = width_; }
+    void setHeight(int height_) noexcept { x = height_; }
     bool needsUpdate() const noexcept { return needUpdate; }
     void invalidate() noexcept { needUpdate = true; }
 
     SDL_Surface *surfPointer() const noexcept { return surface.get(); };
 
+    template<typename Callable>
+    void setClickHandler(Callable callback)
+    {
+        onClickCallback = callback;
+    }
+
 protected:
     int x, y, width, height;
     bool needUpdate;
+    bool AABB(const int x_, const int y_) const noexcept;
 
-    SDL_IO& io;
-
+    ClickHandler onClickCallback;
     SDL_IO::SurfacePointer surface;
+
 };
 
 class ComponentContainer : public Component {
 public:
-    ComponentContainer(SDL_IO& ioref, int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer s)
-        : Component(ioref, x_, y_, width_, height_, std::move(s)) {}
+    ComponentContainer(int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer s)
+        : Component(x_, y_, width_, height_, std::move(s)) {}
 
     virtual ~ComponentContainer() {}
 
-    virtual void update() override;
+    virtual void update(DrawingContext&&);
+    virtual void update(const DrawingContext&) override;
+    virtual void redraw(const DrawingContext&) override {}
 
-    void addChild(std::string id, std::unique_ptr<Component> c)
+    virtual bool handleEvent(const SDL_IO::EventArgs& e) override;
+
+    template<typename T>
+    void addChild(std::unique_ptr<T> c)
     {
-        children[id] = std::move(c);
+        c->setX(c->X() + x);
+        c->setY(c->Y() + y);
+        auto child = std::unique_ptr<Component>(dynamic_cast<Component*>(c.release()));
+        children.push_back(std::move(child));
     }
-
 protected:
-    std::map<std::string, std::unique_ptr<Component>> children;
-};
-
-//class ButtonComponent : public Component {
-
-//};
-
-class MenuComponent : public ComponentContainer {
-public:
-    MenuComponent(SDL_IO& ioref, int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer sp) 
-        : ComponentContainer(ioref, x_, y_, width_, height_, std::move(sp))
-    {
-    }
-    virtual ~MenuComponent() {}
-
-    virtual void redraw() override;
+    std::vector<std::unique_ptr<Component>> children;
+    virtual bool handleMouseEvent(const SDL_IO::EventArgs& e);
 };
 
 #endif //component_h

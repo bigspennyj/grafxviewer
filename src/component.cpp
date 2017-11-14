@@ -1,30 +1,63 @@
 #include <iostream>
-#include "io.h"
+#include "drawingcontext.h"
 #include "component.h"
 
-void Component::update()
+//------------------------------------------------------------------------------
+// Component functions
+//------------------------------------------------------------------------------
+void Component::update(const DrawingContext& c)
 {
     if (needUpdate) {
-        redraw();
+        redraw(c);
         needUpdate = false;
     }
 }
 
-void ComponentContainer::update()
+bool Component::AABB(const int x_, const int y_) const noexcept
 {
-    Component::update();
+    return (x_ >= x && x_ <= x + width)
+        && (y_ >= y && y_ <= y + height);
+}
+
+//------------------------------------------------------------------------------
+// ComponentContainer functions
+//------------------------------------------------------------------------------
+void ComponentContainer::update(const DrawingContext& c)
+{
+    Component::update(c);
 
     for (const auto& child : children) {
-        if (child.second->needsUpdate())
-            child.second->update();
+        child->update(c);
     }
 }
 
-void MenuComponent::redraw()
+void ComponentContainer::update(DrawingContext&& c)
 {
-    std::cout << "REDRAW" << std::endl;
-    io.setColor(0xff666666);
-    io.drawRectangle(surface, 0, 0, width, height);
-    // TODO: move this up to SDL_IO
-    io.drawComponent(*this);
+    update(c);
 }
+
+
+bool ComponentContainer::handleEvent(const SDL_IO::EventArgs& e)
+{
+    for (const auto& child : children) {
+        if (child->handleEvent(e))
+            return true;
+    }
+    if (handleMouseEvent(e))
+        return true;
+    return false;
+}
+
+
+
+bool ComponentContainer::handleMouseEvent(const SDL_IO::EventArgs& e)
+{
+    if (AABB(e.x, e.y)) {
+        std::cout << "componentcontainer clicked" << std::endl;
+        if (onClickCallback)
+            onClickCallback(e);
+        return true;
+    }
+    return false;
+}
+
