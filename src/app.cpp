@@ -20,22 +20,19 @@ int App::execute()
 {
     Uint32 delayTime = (1.0 / FRAME_RATE) * 1000;
     // temporary initialization section
+    // this is dangerous and should be fixed!
     auto menu = io->createMenuComponent(0, 500, 800, 100);
 
     auto button = io->createButton(25, 25, 50, 50);
+    button->setClickHandler([](auto& e) { std::cout << "from the click handler!  got " << e.x << " " << e.y << std::endl; });
     menu->addChild(std::move(button));
 
     io->getRoot()->addChild(std::move(menu));
+    // menu and button are invalid
     while (run) {
         Uint32 startTicks = io->getTicks();
+
         run = io->handleEvents();
-
-        int thisHeight = io->getHeight();
-
-        io->setColor(leftBackground);
-        io->drawRectangle(0, 0, 0, thisHeight);
-
-        io->setColor(0xff666666);
 
         io->updateScreen();
 

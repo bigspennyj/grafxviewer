@@ -9,6 +9,8 @@
 
 class Component {
 public:
+    using ClickHandler = std::function<void(const SDL_IO::EventArgs&)>;
+
     Component(int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer s) :
         x(x_), y(y_), width(width_), height(height_), needUpdate(true), surface(std::move(s)) {}
 
@@ -32,6 +34,12 @@ public:
 
     SDL_Surface *surfPointer() const noexcept { return surface.get(); };
 
+    template<typename Callable>
+    void setClickHandler(Callable callback)
+    {
+        onClickCallback = callback;
+    }
+
 protected:
     int x, y, width, height;
     bool needUpdate;
@@ -41,7 +49,9 @@ protected:
             && (y_ >= y && y_ <= y + height);
     }
 
+    ClickHandler onClickCallback;
     SDL_IO::SurfacePointer surface;
+
 };
 
 class ComponentContainer : public Component {
@@ -81,6 +91,8 @@ protected:
     {
         if (AABB(e.x, e.y)) {
             std::cout << "componentcontainer clicked" << std::endl;
+            if (onClickCallback)
+                onClickCallback(e);
             return true;
         }
         return false;
@@ -101,6 +113,8 @@ public:
         if (AABB(e.x, e.y)) {
             //handle
             std::cout << "button clicked!" << std::endl;
+            if (onClickCallback)
+                onClickCallback(e);
             return true;
         }
         return false;

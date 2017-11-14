@@ -23,6 +23,7 @@ void ComponentContainer::update(DrawingContext&& c)
 {
     update(c);
 }
+
 void MenuComponent::redraw(const DrawingContext& c)
 {
     std::cout << "REDRAW" << std::endl;
