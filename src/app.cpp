@@ -1,5 +1,5 @@
 #include "app.h"
-#include "component.h"
+#include "appcomponent.h"
 #include <cstdint>
 #include <iostream>
 

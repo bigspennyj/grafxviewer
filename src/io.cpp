@@ -1,5 +1,6 @@
 #include "io.h"
 #include "component.h"
+#include "appcomponent.h"
 #include <iostream>
 
 SDL_IO::SDL_IO(int width, int height)
@@ -157,7 +158,12 @@ bool SDL_IO::handleEvents()
                 break;
             }
         } else if (e.type == SDL_MOUSEBUTTONDOWN) {
-            EventArgs args{ e.button.x, e.button.y };
+            EventArgs args{ e.button.x, e.button.y, true };
+            if (!rootComponent->handleEvent(args))
+                std::cout << "unhandled mouse event" << std::endl;
+            return true;
+        } else if (e.type == SDL_MOUSEBUTTONUP) {
+            EventArgs args{ e.button.x, e.button.y, false };
             if (!rootComponent->handleEvent(args))
                 std::cout << "unhandled mouse event" << std::endl;
             return true;

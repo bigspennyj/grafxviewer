@@ -14,7 +14,7 @@ public:
     Component(int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer s) :
         x(x_), y(y_), width(width_), height(height_), needUpdate(true), surface(std::move(s)) {}
 
-    virtual ~Component() { std::cout << "~COMPONENT" << std::endl; }
+    virtual ~Component() { }
 
     virtual void update(const DrawingContext& c);
     virtual void redraw(const DrawingContext& c) = 0;
@@ -43,11 +43,7 @@ public:
 protected:
     int x, y, width, height;
     bool needUpdate;
-    bool AABB(const int x_, const int y_) const noexcept
-    {
-        return (x_ >= x && x_ <= x + width)
-            && (y_ >= y && y_ <= y + height);
-    }
+    bool AABB(const int x_, const int y_) const noexcept;
 
     ClickHandler onClickCallback;
     SDL_IO::SurfacePointer surface;
@@ -65,16 +61,7 @@ public:
     virtual void update(const DrawingContext&) override;
     virtual void redraw(const DrawingContext&) override {}
 
-    virtual bool handleEvent(const SDL_IO::EventArgs& e) override
-    {
-        for (const auto& child : children) {
-            if (child->handleEvent(e))
-                return true;
-        }
-        if (handleMouseEvent(e))
-            return true;
-        return false;
-    }
+    virtual bool handleEvent(const SDL_IO::EventArgs& e) override;
 
     template<typename T>
     void addChild(std::unique_ptr<T> c)
@@ -84,55 +71,9 @@ public:
         auto child = std::unique_ptr<Component>(dynamic_cast<Component*>(c.release()));
         children.push_back(std::move(child));
     }
-
 protected:
     std::vector<std::unique_ptr<Component>> children;
-    virtual bool handleMouseEvent(const SDL_IO::EventArgs& e)
-    {
-        if (AABB(e.x, e.y)) {
-            std::cout << "componentcontainer clicked" << std::endl;
-            if (onClickCallback)
-                onClickCallback(e);
-            return true;
-        }
-        return false;
-    }
-};
-
-class Button : public Component {
-public:
-    Button(int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer sp)
-        : Component(x_, y_, width_, height_, std::move(sp)), buttonText()
-    {
-    }
-    virtual ~Button() {}
-
-    virtual void redraw(const DrawingContext& c) override;
-    virtual bool handleEvent(const SDL_IO::EventArgs& e) override
-    {
-        if (AABB(e.x, e.y)) {
-            //handle
-            std::cout << "button clicked!" << std::endl;
-            if (onClickCallback)
-                onClickCallback(e);
-            return true;
-        }
-        return false;
-    }
-
-private:
-    std::string buttonText;
-};
-
-class MenuComponent : public ComponentContainer {
-public:
-    MenuComponent(int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer sp)
-        : ComponentContainer(x_, y_, width_, height_, std::move(sp))
-    {
-    }
-    virtual ~MenuComponent() {}
-
-    virtual void redraw(const DrawingContext& c) override;
+    virtual bool handleMouseEvent(const SDL_IO::EventArgs& e);
 };
 
 #endif //component_h
