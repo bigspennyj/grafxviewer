@@ -1,5 +1,6 @@
 #include "app.h"
 #include "appcomponent.h"
+#include "model.h"
 #include <cstdint>
 #include <iostream>
 
@@ -8,12 +9,6 @@ App::App() :
     run(true),
     leftBackground(0xffffffff)
 {
-    io->attach(*this);
-}
-
-void App::notify()
-{
-    leftBackground = ~leftBackground;
 }
 
 int App::execute()
@@ -27,6 +22,13 @@ int App::execute()
     button->setClickHandler([](auto& e) { std::cout << "from the click handler!  got " << e.x << " " << e.y << std::endl; });
     menu->addChild(std::move(button));
 
+    std::ifstream points("./lab.dat.csv");
+    std::ifstream lines("./lab.lines.dat.csv");
+    Model model(points, lines);
+
+    auto modelView = io->createModelView(0, 0, 800, 500, model);
+
+    io->getRoot()->addChild(std::move(modelView));
     io->getRoot()->addChild(std::move(menu));
     // menu and button are invalid
     while (run) {
