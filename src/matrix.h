@@ -18,6 +18,7 @@ public:
     const Vector3D& operator[](int i) const;
 
     Matrix& operator*=(const TransformationMatrix& rhs);
+    bool operator==(const Matrix& other);
 
     auto& getRows() const noexcept { return rows; }
 

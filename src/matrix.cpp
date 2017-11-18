@@ -16,6 +16,20 @@ const Vector3D& Matrix::operator[](int i) const
     return rows[i];
 }
 
+bool Matrix::operator==(const Matrix& other)
+{
+    if (rows.size() != other.rows.size())
+        return false;
+
+    for (int i = 0; i < rows.size(); i++) {
+        for (int j = 0; j < 4; j++) {
+            if (rows[i][j] != other.rows[i][j])
+                return false;
+        }
+    }
+    return true;
+}
+
 
 Matrix& Matrix::operator*=(const TransformationMatrix& rhs)
 {
