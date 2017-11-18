@@ -8,7 +8,6 @@ class App {
 private:
     std::unique_ptr<SDL_IO> io;
     bool run;
-    int leftBackground;
 
 public:
     App();
