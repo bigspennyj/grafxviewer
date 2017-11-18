@@ -40,21 +40,70 @@ SDL_IO::SDL_IO(int width, int height)
 
 void SDL_IO::drawComponent(const Component& c)
 {
-    std::cout << "Drawing component: " << c.X() << " " << c.Y() << " " << c.Width()  << " " << c.Height() << std::endl;
+    std::cout <<
+        "Drawing component: " <<
+        c.X() << " " << c.Y() << " " <<
+        c.Width()  << " " << c.Height() << std::endl;
+
     SDL_Rect dest = { c.X(), c.Y(), c.X() + c.Width(), c.Y() + c.Height() };
     SDL_BlitSurface(c.surfPointer(), nullptr, buffer.get(), &dest);
 }
 
+void SDL_IO::drawLine(int x1, int y1, int x2, int y2)
+{
+    //TODO: this is a hack
+    lineSegments.push_back(
+            std::pair<SDL_Point, SDL_Point>({x1, y1}, {x2, y2})
+            );
+}
+
 std::unique_ptr<MenuComponent> SDL_IO::createMenuComponent(int x, int y, int w, int h)
 {
-    SurfacePointer surf(SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000), SDL_FreeSurface);
-    return std::unique_ptr<MenuComponent>(new MenuComponent(x, y, w, h, std::move(surf)));
+    SurfacePointer surf(
+            SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000),
+            SDL_FreeSurface
+            );
+
+    return std::unique_ptr<MenuComponent>(
+            new MenuComponent(x, y, w, h, std::move(surf))
+            );
 }
 
 std::unique_ptr<Button> SDL_IO::createButton(int x, int y, int w, int h)
 {
-    SurfacePointer surf(SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000), SDL_FreeSurface);
-    return std::unique_ptr<Button>(new Button(x, y, w, h, std::move(surf)));
+    SurfacePointer surf(
+            SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000),
+            SDL_FreeSurface
+            );
+
+    return std::unique_ptr<Button>(
+            new Button(x, y, w, h, std::move(surf))
+            );
+}
+
+std::unique_ptr<ModelView> SDL_IO::createModelView(int x, int y, int w, int h, const Model& m)
+{
+    SurfacePointer surf(
+            SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000),
+            SDL_FreeSurface
+            );
+
+    return std::unique_ptr<ModelView>(
+            new ModelView(x, y, w, h, m, std::move(surf))
+            );
+}
+
+SDL_IO::RendererPointer SDL_IO::createSoftwareRenderer(const Component& c)
+{
+    return RendererPointer(
+            SDL_CreateSoftwareRenderer(c.surfPointer()), SDL_DestroyRenderer
+            );
+}
+
+SDL_IO::RendererPointer SDL_IO::createSoftwareRenderer()
+{
+    auto renderer = SDL_CreateSoftwareRenderer(rootComponent->surfPointer());
+    return RendererPointer(renderer, SDL_DestroyRenderer);
 }
 
 int SDL_IO::getWidth() const noexcept
@@ -111,7 +160,7 @@ void SDL_IO::renderImage(std::string key, int x, int y)
     }
 }
 
-void SDL_IO::setColor(int rgba)
+void SDL_IO::setColor(unsigned int rgba)
 {
     SDL_SetRenderDrawColor(renderer.get(),
             rgba & 0x00ff0000,
@@ -136,9 +185,17 @@ void SDL_IO::drawRectangle(const SurfacePointer& s, int x1, int y1, int x2, int 
 void SDL_IO::updateScreen()
 {
     rootComponent->invalidate();
-    rootComponent->update(DrawingContext(*this));
+    auto r = createSoftwareRenderer();
+    DrawingContext dc(*this, std::move(r));
+    rootComponent->update(dc);
     SDL_UpdateTexture(screenTexture.get(), nullptr, buffer->pixels, buffer->pitch);
     SDL_RenderCopy(renderer.get(), screenTexture.get(), nullptr, nullptr);
+
+    //TODO: this is an awful hack
+    SDL_SetRenderDrawColor(renderer.get(), 0xff, 0xff, 0xff, 0xff);
+    for (auto& line : lineSegments) {
+        SDL_RenderDrawLine(renderer.get(), line.first.x, line.first.y, line.second.x, line.second.y);
+    }
     SDL_RenderPresent(renderer.get());
     //SDL_FillRect(buffer.get(), nullptr, 0xffffffff);
 }

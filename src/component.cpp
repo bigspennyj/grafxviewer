@@ -5,10 +5,11 @@
 //------------------------------------------------------------------------------
 // Component functions
 //------------------------------------------------------------------------------
-void Component::update(const DrawingContext& c)
+void Component::update(DrawingContext& dc)
 {
     if (needUpdate) {
-        redraw(c);
+        dc.setTarget(*this);
+        redraw(dc);
         needUpdate = false;
     }
 }
@@ -22,7 +23,7 @@ bool Component::AABB(const int x_, const int y_) const noexcept
 //------------------------------------------------------------------------------
 // ComponentContainer functions
 //------------------------------------------------------------------------------
-void ComponentContainer::update(const DrawingContext& c)
+void ComponentContainer::update(DrawingContext& c)
 {
     Component::update(c);
 
@@ -30,12 +31,6 @@ void ComponentContainer::update(const DrawingContext& c)
         child->update(c);
     }
 }
-
-void ComponentContainer::update(DrawingContext&& c)
-{
-    update(c);
-}
-
 
 bool ComponentContainer::handleEvent(const SDL_IO::EventArgs& e)
 {

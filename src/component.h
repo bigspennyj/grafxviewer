@@ -16,7 +16,7 @@ public:
 
     virtual ~Component() { }
 
-    virtual void update(const DrawingContext& c);
+    virtual void update(DrawingContext& c);
     virtual void redraw(const DrawingContext& c) = 0;
     virtual bool handleEvent(const SDL_IO::EventArgs& e) = 0;
 
@@ -57,19 +57,22 @@ public:
 
     virtual ~ComponentContainer() {}
 
-    virtual void update(DrawingContext&&);
-    virtual void update(const DrawingContext&) override;
+    virtual void update(DrawingContext& c) override;
     virtual void redraw(const DrawingContext&) override {}
 
     virtual bool handleEvent(const SDL_IO::EventArgs& e) override;
 
     template<typename T>
-    void addChild(std::unique_ptr<T> c)
+    const std::unique_ptr<Component>& addChild(std::unique_ptr<T> c)
     {
+        // coords should be relative to the container, so update them
         c->setX(c->X() + x);
         c->setY(c->Y() + y);
+
         auto child = std::unique_ptr<Component>(dynamic_cast<Component*>(c.release()));
         children.push_back(std::move(child));
+
+        return children.back();
     }
 protected:
     std::vector<std::unique_ptr<Component>> children;

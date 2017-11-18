@@ -4,11 +4,10 @@
 #include <memory>
 #include "io.h"
 
-class App : public Observer<SDL_IO> {
+class App {
 private:
     std::unique_ptr<SDL_IO> io;
     bool run;
-    int leftBackground;
 
 public:
     App();
@@ -16,7 +15,6 @@ public:
     static constexpr double FRAME_RATE = 60.0;
 
     int execute();
-    void notify() override;
 };
 
 #endif
