@@ -1,5 +1,6 @@
 #include "app.h"
 #include "appcomponent.h"
+#include "modelview.h"
 #include "model.h"
 #include <cstdint>
 #include <iostream>

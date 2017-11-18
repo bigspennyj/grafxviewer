@@ -36,6 +36,7 @@ public:
         }
         lineFile.close();
     }
+
     Model(Matrix c) : currentCoords(c), lineSegments() {}
     //const Matrix& getOriginalCoords() const noexcept { return originalCoords; }
     const Matrix& getCurrentCoords() const noexcept { return currentCoords; }

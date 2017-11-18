@@ -1,6 +1,7 @@
 #include "io.h"
 #include "component.h"
 #include "appcomponent.h"
+#include "modelview.h"
 #include <iostream>
 
 SDL_IO::SDL_IO(int width, int height)

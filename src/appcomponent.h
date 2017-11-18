@@ -35,19 +35,4 @@ public:
     virtual void redraw(const DrawingContext& c) override;
 };
 
-class ModelView : public Component {
-public:
-    ModelView(int x_, int y_, int width_, int height_, const Model& model_,
-            SDL_IO::SurfacePointer sp)
-        : Component(x_, y_, width_, height_, std::move(sp)), model(model_), unit(height_ / 100)
-    {}
-
-    virtual void redraw(const DrawingContext& c) override;
-    virtual bool handleEvent(const SDL_IO::EventArgs& e) override { return false; }
-
-private:
-    const Model& model;
-    double unit;
-};
-
 #endif //APP_COMPONENT_H

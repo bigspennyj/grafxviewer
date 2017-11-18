@@ -1,3 +1,5 @@
 bin/*.o
 bin/gfxv
-cmake/*
+bin/gfxv-test
+build/*
+lib/*

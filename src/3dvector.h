@@ -11,7 +11,13 @@ public:
         terms{{x, y, z, 1}}
     {}
 
-    double operator[](int i) { return terms[i]; }
+    Vector3D(double x, double y, double z, double h) :
+        terms{{x, y, z, h}}
+    {}
+
+
+    double& operator[](int i) { return terms[i]; }
+    double operator[](int i) const { return terms[i]; }
 
     double getX() const noexcept { return terms[0]; }
     double getY() const noexcept { return terms[1]; }
