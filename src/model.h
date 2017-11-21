@@ -25,7 +25,7 @@ public:
             double x, y, z;
             while (pointFile >> x >> y >> z) {
                 // TODO: this
-                currentCoords.addRow(Vector3D(x - cx, (y - cy) * -1, z - cz));
+                currentCoords.addRow(Vector3D(x, y * -1, z));
             }
             std::cout << "read " << currentCoords.getRows().size() << " points" << std::endl;
         }
