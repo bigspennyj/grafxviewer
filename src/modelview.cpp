@@ -30,7 +30,7 @@ void ModelView::redraw(const DrawingContext& c)
         c.drawRectangle(surface, x, y, 3, 3);
     }
 
-    c.setColor(0x00, 0xD8, 0xD8, 0xff);
+    c.setColor(0x00, 0x44, 0xD8, 0xff);
     //draw our lines
     for (auto& seg : model2.getLineSegments()) {
         auto& p1 = rcoords[seg.first - 1];
