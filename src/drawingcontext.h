@@ -2,6 +2,7 @@
 #define DRAWING_CONTEXT_H
 
 #include "io.h"
+#include <iostream>
 
 class Component;
 
@@ -18,24 +19,37 @@ public:
         io.drawRectangle(s, x1, y1, x2, y2);
     }
 
-    void drawComponent(const Component& c) const
+    void drawRectangle(int x1, int y1, int x2, int y2) const
     {
-        io.drawComponent(c);
+        io.drawRectangle(renderer, x1, y1, x2, y2);
     }
 
-    void setColor(int rgba) const
+    void drawComponent(const Component& c) const
     {
-        io.setColor(rgba);
+        io.drawComponent(renderer, c);
+    }
+
+    void setColor(int r, int g, int b, int a) const
+    {
+        io.setColor(renderer, r, g, b, a);
     }
 
     void drawLine(int x1, int y1, int x2, int y2) const
     {
-        io.drawLine(x1, y1, x2, y2);
+        io.drawLine(renderer, x1, y1, x2, y2);
     }
 
     void setTarget(Component& c)
     {
-        renderer.reset(io.createSoftwareRenderer(c).release());
+    }
+
+    void setTarget(const std::unique_ptr<Component>& c)
+    {
+    }
+
+    void drawImage(const SDL_IO::SurfacePointer& s, int x, int y, std::string imageKey) const
+    {
+        io.renderImage(s, imageKey, x, y);
     }
 
 private:

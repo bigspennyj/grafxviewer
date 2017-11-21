@@ -59,16 +59,22 @@ public:
 
     void loadImage(std::string imgPath, std::string imgKey);
     RendererPointer createSoftwareRenderer(const Component& c);
+    RendererPointer createSoftwareRenderer(const std::unique_ptr<Component>& c);
     RendererPointer createSoftwareRenderer();
     void renderImage(std::string key, int x, int y);
+    void renderImage(const SurfacePointer& p, std::string key, int x, int y);
     void updateScreen();
 
     void drawRectangle(int x1, int y1, int x2, int y2);
+    void drawRectangle(const RendererPointer& r, int x1, int y1, int x2, int y2);
     void drawRectangle(SurfacePointerBorrow s, int x1, int y1, int x2, int y2);
     void drawComponent(const Component& c);
+    void drawComponent(const RendererPointer& r, const Component& c);
     void drawLine(int x1, int y1, int x2, int y2);
+    void drawLine(const RendererPointer& r, int x1, int y1, int x2, int y2);
     //void drawLines(std::vector<Vector3D> points);
     void setColor(unsigned int rgba);
+    void setColor(const RendererPointer& rp, int r, int g, int b, int a);
 
     const std::unique_ptr<ComponentContainer>& getRoot()
     {

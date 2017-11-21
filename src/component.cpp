@@ -9,8 +9,7 @@ void Component::update(DrawingContext& dc)
 {
     if (needUpdate) {
         dc.setTarget(*this);
-        redraw(dc);
-        needUpdate = false;
+        redraw(dc); //this sets needUpdate on a per-component basis
     }
 }
 
@@ -28,6 +27,7 @@ void ComponentContainer::update(DrawingContext& c)
     Component::update(c);
 
     for (const auto& child : children) {
+        c.setTarget(child);
         child->update(c);
     }
 }

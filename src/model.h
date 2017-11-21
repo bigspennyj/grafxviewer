@@ -41,6 +41,11 @@ public:
     //const Matrix& getOriginalCoords() const noexcept { return originalCoords; }
     const Matrix& getCurrentCoords() const noexcept { return currentCoords; }
     const std::vector<std::pair<int, int>>& getLineSegments() const noexcept { return lineSegments; }
+
+    void applyTransformation(TransformationMatrix& m)
+    {
+        currentCoords *= m;
+    }
 private:
     //Matrix originalCoords;
     Matrix currentCoords;

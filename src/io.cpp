@@ -41,11 +41,13 @@ SDL_IO::SDL_IO(int width, int height)
 
 void SDL_IO::drawComponent(const Component& c)
 {
-    std::cout <<
-        "Drawing component: " <<
-        c.X() << " " << c.Y() << " " <<
-        c.Width()  << " " << c.Height() << std::endl;
+    SDL_Rect dest = { c.X(), c.Y(), c.X() + c.Width(), c.Y() + c.Height() };
+    SDL_BlitSurface(c.surfPointer(), nullptr, buffer.get(), &dest);
+}
 
+void SDL_IO::drawComponent(const RendererPointer& r, const Component& c)
+{
+    SDL_RenderPresent(r.get());
     SDL_Rect dest = { c.X(), c.Y(), c.X() + c.Width(), c.Y() + c.Height() };
     SDL_BlitSurface(c.surfPointer(), nullptr, buffer.get(), &dest);
 }
@@ -56,6 +58,11 @@ void SDL_IO::drawLine(int x1, int y1, int x2, int y2)
     lineSegments.push_back(
             std::pair<SDL_Point, SDL_Point>({x1, y1}, {x2, y2})
             );
+}
+
+void SDL_IO::drawLine(const RendererPointer& r, int x1, int y1, int x2, int y2)
+{
+    SDL_RenderDrawLine(r.get(), x1, y1, x2, y2);
 }
 
 std::unique_ptr<MenuComponent> SDL_IO::createMenuComponent(int x, int y, int w, int h)
@@ -94,16 +101,27 @@ std::unique_ptr<ModelView> SDL_IO::createModelView(int x, int y, int w, int h, c
             );
 }
 
-SDL_IO::RendererPointer SDL_IO::createSoftwareRenderer(const Component& c)
-{
-    return RendererPointer(
+SDL_IO::RendererPointer SDL_IO::createSoftwareRenderer(const Component& c) {
+    RendererPointer p(
             SDL_CreateSoftwareRenderer(c.surfPointer()), SDL_DestroyRenderer
             );
+    if (p == nullptr)
+        std::cout << "NULLPTR" << std::endl;
+    return p;
+}
+
+SDL_IO::RendererPointer SDL_IO::createSoftwareRenderer(const std::unique_ptr<Component>& c) {
+    RendererPointer p(
+            SDL_CreateSoftwareRenderer(c->surfPointer()), SDL_DestroyRenderer
+            );
+    if (p == nullptr)
+        std::cout << "NULLPTR" << std::endl;
+    return p;
 }
 
 SDL_IO::RendererPointer SDL_IO::createSoftwareRenderer()
 {
-    auto renderer = SDL_CreateSoftwareRenderer(rootComponent->surfPointer());
+    auto renderer = SDL_CreateSoftwareRenderer(buffer.get());
     return RendererPointer(renderer, SDL_DestroyRenderer);
 }
 
@@ -161,6 +179,19 @@ void SDL_IO::renderImage(std::string key, int x, int y)
     }
 }
 
+void SDL_IO::renderImage(const SurfacePointer& p, std::string key, int x, int y)
+{
+    SDL_Surface *surf = texMap[key];
+    if (surf) {
+        SDL_Rect destRect = {
+            x, y, x + surf->w, y + surf->h
+        };
+        SDL_BlitSurface(surf, nullptr, p.get(), &destRect);
+    } else {
+        std::cout << "Failed to find surface for key " << key << std::endl;
+    }
+}
+
 void SDL_IO::setColor(unsigned int rgba)
 {
     SDL_SetRenderDrawColor(renderer.get(),
@@ -171,10 +202,22 @@ void SDL_IO::setColor(unsigned int rgba)
     currentDrawColor = rgba;
 }
 
+void SDL_IO::setColor(const RendererPointer& rp, int r, int g, int b, int a)
+{
+    SDL_SetRenderDrawColor(rp.get(), r, g, b, a);
+}
+
 void SDL_IO::drawRectangle(int x1, int y1, int x2, int y2)
 {
     SDL_Rect destRect = { x1, y1, x2, y2 };
     SDL_FillRect(buffer.get(), &destRect, currentDrawColor);
+}
+
+
+void SDL_IO::drawRectangle(const RendererPointer& r, int x1, int y1, int x2, int y2)
+{
+    SDL_Rect destRect = { x1, y1, x2, y2 };
+    SDL_RenderFillRect(r.get(), &destRect);
 }
 
 void SDL_IO::drawRectangle(const SurfacePointer& s, int x1, int y1, int x2, int y2)
@@ -192,11 +235,6 @@ void SDL_IO::updateScreen()
     SDL_UpdateTexture(screenTexture.get(), nullptr, buffer->pixels, buffer->pitch);
     SDL_RenderCopy(renderer.get(), screenTexture.get(), nullptr, nullptr);
 
-    //TODO: this is an awful hack
-    SDL_SetRenderDrawColor(renderer.get(), 0xff, 0xff, 0xff, 0xff);
-    for (auto& line : lineSegments) {
-        SDL_RenderDrawLine(renderer.get(), line.first.x, line.first.y, line.second.x, line.second.y);
-    }
     SDL_RenderPresent(renderer.get());
     //SDL_FillRect(buffer.get(), nullptr, 0xffffffff);
 }

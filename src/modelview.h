@@ -10,8 +10,8 @@ public:
     ModelView(int x_, int y_, int width_, int height_, const Model& model_,
             SDL_IO::SurfacePointer sp)
         : Component(x_, y_, width_, height_, std::move(sp)),
-        model(model_), unit(height_ / 100),
-        activeTrans(), continuousTrans()
+        model(model_), unit(height_ / 60),
+        activeTrans(), continuousTrans(), projectionMatrix(computeProjectionMatrix())
     {}
 
     virtual void redraw(const DrawingContext& c) override;
@@ -24,8 +24,11 @@ private:
     const Model& model;
     double unit;
 
-    Matrix activeTrans;
-    Matrix continuousTrans;
+    TransformationMatrix computeProjectionMatrix();
+
+    TransformationMatrix activeTrans;
+    TransformationMatrix continuousTrans;
+    TransformationMatrix projectionMatrix;
 };
 
 #endif // MODEL_VIEW_H

@@ -7,16 +7,16 @@ TEST_CASE("Transformation Matricies should function properly", "[transformation]
     
     SECTION("should be able to add translation")
     {
-        transformationMatrix.addTranslation(15, -2);
+        transformationMatrix.addTranslation(15, -2, 4);
 
         TransformationMatrix result({
             {1, 0, 0, 0},
             {0, 1, 0, 0},
             {0, 0, 1, 0},
-            {15, -2, 0, 1}
+            {15, -2, 4, 1}
         });
 
-        REQUIRE(transformationMatrix == result);
+        REQUIRE((transformationMatrix == result));
     }
 
     SECTION("Should be able to add a rotation")
@@ -26,7 +26,7 @@ TEST_CASE("Transformation Matricies should function properly", "[transformation]
 
         TransformationMatrix result;
 
-        REQUIRE(transformationMatrix == result);
+        REQUIRE(false);
     }
     
 }

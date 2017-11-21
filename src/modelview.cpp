@@ -2,11 +2,14 @@
 
 void ModelView::redraw(const DrawingContext& c)
 {
-    //draw a black background
-    c.setColor(0xff000000);
-    c.drawRectangle(surface, 0, 0, width, height);
-    auto& coords = model.getCurrentCoords();
+    //draw a darkbackground
+    c.setColor(0x18, 0x13, 0x1B, 0xff);
+    c.drawRectangle(0, 0, width, height);
 
+    Matrix coords = model.getCurrentCoords();
+    coords *= projectionMatrix;
+
+    c.setColor(0xD8, 0xD8, 0xD8, 0xff);
     //draw our lines
     for (auto& seg : model.getLineSegments()) {
         auto& p1 = coords[seg.first - 1];
@@ -19,7 +22,6 @@ void ModelView::redraw(const DrawingContext& c)
     }
 
     //draw points of our shape
-    c.setColor(0xffffffff);
     for (auto& row : coords.getRows()) {
         // draw a 3x3 block around each coordinate
         int x = ((row.getX() * unit) + width / 2) - 1;
@@ -28,6 +30,28 @@ void ModelView::redraw(const DrawingContext& c)
     }
 
     c.drawComponent(*this);
-    // always redraw?
-    needUpdate = false;
+}
+
+TransformationMatrix ModelView::computeProjectionMatrix()
+{
+    Vector3D ourPosition(0, 0, -100);
+
+    //i think this stuff is all right?
+    Vector3D nHat(0, 0, -1);
+
+    // up should just be 0 1 0, right?
+    Vector3D uHat(0, 1, 0);
+
+    // and vHat is just going to be 1 0 1 right?
+    Vector3D vHat(1, 0, 0);
+    
+    // so to get the whole thing, we do some stuff
+    TransformationMatrix m{
+        {0, 1, 0, 1},
+        {1, 0, 0, 1},
+        {0, 0, -1, 1},
+        {0, 0, 0, 1}
+    };
+    
+    return m;
 }

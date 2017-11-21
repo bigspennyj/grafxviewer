@@ -3,16 +3,19 @@
 
 void MenuComponent::redraw(const DrawingContext& c)
 {
-    c.setColor(0xff666666);
+    //draw bg
+    c.setColor(0x18, 0x13, 0x1B, 0xff);
     c.drawRectangle(surface, 0, 0, width, height);
+    c.drawImage(surface, 0, 0, "menu-bg");
     c.drawComponent(*this);
+    needUpdate = false;
 }
 
 void Button::redraw(const DrawingContext& c)
 {
-    c.setColor(currentColor);
-    c.drawRectangle(surface, 0, 0, width, height);
+    c.drawImage(surface, 0, 0, "button-up");
     c.drawComponent(*this);
+    needUpdate = false;
 }
 
 bool Button::handleEvent(const SDL_IO::EventArgs& e)
