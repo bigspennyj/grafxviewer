@@ -21,18 +21,22 @@ public:
         double cx, cy, cz;
         pointFile >> cx >> cy >> cz;
         if (pointFile) {
+            std::cout << "reading pointfile" << std::endl;
             double x, y, z;
             while (pointFile >> x >> y >> z) {
                 // TODO: this
                 currentCoords.addRow(Vector3D(x - cx, (y - cy) * -1, z - cz));
             }
+            std::cout << "read " << currentCoords.getRows().size() << " points" << std::endl;
         }
         pointFile.close();
         if (lineFile) {
+            std::cout << "reading linefile" << std::endl;
             int l1, l2;
             while (lineFile >> l1 >> l2) {
                 lineSegments.push_back(std::make_pair(l1, l2));
             }
+            std::cout << "read " << lineSegments.size() << " segments" << std::endl;
         }
         lineFile.close();
     }

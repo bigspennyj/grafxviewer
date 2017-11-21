@@ -89,7 +89,7 @@ std::unique_ptr<Button> SDL_IO::createButton(int x, int y, int w, int h)
             );
 }
 
-std::unique_ptr<ModelView> SDL_IO::createModelView(int x, int y, int w, int h, const Model& m)
+std::unique_ptr<ModelView> SDL_IO::createModelView(int x, int y, int w, int h, const Model& m, const Model& mr)
 {
     SurfacePointer surf(
             SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000),
@@ -97,7 +97,7 @@ std::unique_ptr<ModelView> SDL_IO::createModelView(int x, int y, int w, int h, c
             );
 
     return std::unique_ptr<ModelView>(
-            new ModelView(x, y, w, h, m, std::move(surf))
+            new ModelView(x, y, w, h, m, mr, std::move(surf))
             );
 }
 

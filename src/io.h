@@ -93,7 +93,7 @@ public:
 
     std::unique_ptr<MenuComponent> createMenuComponent(int x, int y, int width, int height);
     std::unique_ptr<Button> createButton(int x, int y, int width, int height);
-    std::unique_ptr<ModelView> createModelView(int x, int y, int width, int height, const Model& m);
+    std::unique_ptr<ModelView> createModelView(int x, int y, int width, int height, const Model& m, const Model& mr);
 
 private:
     WindowPointer window;

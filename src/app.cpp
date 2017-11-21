@@ -7,7 +7,7 @@
 
 App::App() :
     io(new SDL_IO(1024, 768)),
-    run(true)
+    run(true), rotate(false)
 {
 }
 
@@ -21,14 +21,22 @@ int App::execute()
     auto menu = io->createMenuComponent(0, 688, 1024, 80);
 
     auto button = io->createButton(20, 20, 40, 40);
-    button->setClickHandler([](auto& e) { std::cout << "from the click handler!  got " << e.x << " " << e.y << std::endl; });
+    button->setClickHandler([this](auto& e) 
+        { 
+            std::cout << "from the click handler!  got " << e.x << " " << e.y << std::endl; 
+            this->rotate = !this->rotate;
+        });
     menu->addChild(std::move(button));
 
-    std::ifstream points("./data/Qpoints3D.200810.dat");
-    std::ifstream lines("./data/Qlines3D.200810.dat");
+    std::ifstream points("./data/lab.dat.csv");
+    std::ifstream lines("./data/lab.lines.dat.csv");
     Model model(points, lines);
 
-    auto modelView = io->createModelView(0, 0, 1024, 688, model);
+    std::ifstream lines2("./data/lab.lines.dat.csv");
+    std::ifstream points2("./data/lab.right.dat.csv");
+    Model model2(points2, lines2);
+
+    auto modelView = io->createModelView(0, 0, 1024, 688, model, model2);
 
     io->getRoot()->addChild(std::move(modelView));
     io->getRoot()->addChild(std::move(menu));
@@ -45,7 +53,10 @@ int App::execute()
 
         run = io->handleEvents();
 
-        model.applyTransformation(rotation);
+        if (rotate) {
+            model.applyTransformation(rotation);
+            model2.applyTransformation(rotation);
+        }
 
         io->updateScreen();
 

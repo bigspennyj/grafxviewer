@@ -8,6 +8,7 @@ class App {
 private:
     std::unique_ptr<SDL_IO> io;
     bool run;
+    bool rotate;
 
 public:
     App();
