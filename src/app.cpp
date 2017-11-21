@@ -7,15 +7,18 @@
 
 App::App() :
     io(new SDL_IO(1024, 768)),
-    run(true), rotate(false)
+    run(true), rotate(false), model()
 {
 }
 
-int App::execute()
+App::App(std::string pointFile, std::string lineFile) :
+    io(new SDL_IO(1024, 768)),
+    run(true), rotate(false), model(pointFile, lineFile)
 {
-    Uint32 delayTime = (1.0 / FRAME_RATE) * 1000;
-    // temporary initialization section
-    // this is dangerous and should be fixed!
+}
+
+void App::initUIComponents()
+{
     io->loadImage("./assets/bg5.png", "menu-bg");
     io->loadImage("./assets/button.png", "button-up");
     auto menu = io->createMenuComponent(0, 688, 1024, 80);
@@ -28,18 +31,17 @@ int App::execute()
         });
     menu->addChild(std::move(button));
 
-    std::ifstream points("./data/lab.dat.csv");
-    std::ifstream lines("./data/lab.lines.dat.csv");
-    Model model(points, lines);
-
-    std::ifstream lines2("./data/lab.lines.dat.csv");
-    std::ifstream points2("./data/lab.right.dat.csv");
-    Model model2(points2, lines2);
-
-    auto modelView = io->createModelView(0, 0, 1024, 688, model, model2);
+    auto modelView = io->createModelView(0, 0, 1024, 688, model);
 
     io->getRoot()->addChild(std::move(modelView));
     io->getRoot()->addChild(std::move(menu));
+}
+
+int App::execute()
+{
+    Uint32 delayTime = (1.0 / FRAME_RATE) * 1000;
+
+    initUIComponents();
 
     TransformationMatrix rotation = {
         {0.9986, 0, 0.0523, 0},
@@ -55,7 +57,6 @@ int App::execute()
 
         if (rotate) {
             model.applyTransformation(rotation);
-            model2.applyTransformation(rotation);
         }
 
         io->updateScreen();
