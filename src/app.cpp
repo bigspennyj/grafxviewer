@@ -1,38 +1,64 @@
 #include "app.h"
-#include "component.h"
+#include "appcomponent.h"
+#include "modelview.h"
+#include "model.h"
 #include <cstdint>
 #include <iostream>
 
 App::App() :
-    io(new SDL_IO(640, 480)),
-    run(true),
-    leftBackground(0xffffffff)
+    io(new SDL_IO(1024, 768)),
+    run(true), rotate(false), model()
 {
-    io->attach(*this);
 }
 
-void App::notify()
+App::App(std::string pointFile, std::string lineFile) :
+    io(new SDL_IO(1024, 768)),
+    run(true), rotate(false), model(pointFile, lineFile)
 {
-    leftBackground = ~leftBackground;
+}
+
+void App::initUIComponents()
+{
+    io->loadImage("./assets/bg5.png", "menu-bg");
+    io->loadImage("./assets/button.png", "button-up");
+    auto menu = io->createMenuComponent(0, 688, 1024, 80);
+
+    auto button = io->createButton(20, 20, 40, 40);
+    button->setClickHandler([this](auto& e) 
+        { 
+            std::cout << "from the click handler!  got " << e.x << " " << e.y << std::endl; 
+            this->rotate = !this->rotate;
+        });
+    menu->addChild(std::move(button));
+
+    auto modelView = io->createModelView(0, 0, 1024, 688, model);
+
+    io->getRoot()->addChild(std::move(modelView));
+    io->getRoot()->addChild(std::move(menu));
 }
 
 int App::execute()
 {
     Uint32 delayTime = (1.0 / FRAME_RATE) * 1000;
-    auto menu = io->createMenuComponent(0, 380, 640, 100);
 
+    initUIComponents();
+
+    TransformationMatrix rotation = {
+        {0.9986, 0, 0.0523, 0},
+        {0, 1, 0, 0},
+        {-0.0523, 0, 0.9986, 0},
+        {0, 0, 0, 1}
+    };
+    // menu and button are invalid
     while (run) {
         Uint32 startTicks = io->getTicks();
+
         run = io->handleEvents();
 
-        int thisHeight = io->getHeight();
+        if (rotate) {
+            model.applyTransformation(rotation);
+        }
 
-        io->setColor(leftBackground);
-        io->drawRectangle(0, 0, 0, thisHeight);
-
-        io->setColor(0xff666666);
-
-        menu->update();
         io->updateScreen();
 
         Uint32 ticksElapsed = io->getTicks() - startTicks;

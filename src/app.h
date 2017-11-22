@@ -4,19 +4,22 @@
 #include <memory>
 #include "io.h"
 
-class App : public Observer<SDL_IO> {
+class App {
 private:
     std::unique_ptr<SDL_IO> io;
     bool run;
-    int leftBackground;
+    bool rotate;
+    Model model;
+
+    void initUIComponents();
 
 public:
     App();
+    App(std::string pointfile, std::string linefile);
 
     static constexpr double FRAME_RATE = 60.0;
 
     int execute();
-    void notify() override;
 };
 
 #endif

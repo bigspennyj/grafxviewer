@@ -4,7 +4,7 @@ LFLAGS=-lSDL2 -lSDL2_image
 SRCDIR=src
 BINDIR=bin
 
-_SOURCES=main.cpp io.cpp app.cpp component.cpp
+_SOURCES=main.cpp io.cpp app.cpp component.cpp appcomponent.cpp
 SOURCES=$(patsubst %,$(SRCDIR)/%,$(_SOURCES))
 _OBJS=$(_SOURCES:.cpp=.o)
 OBJS=$(patsubst %,$(BINDIR)/%,$(_OBJS))

@@ -1,2 +1,8 @@
 bin/*.o
-bin/app
+bin/gfxv
+bin/gfxv-test
+bin/assets
+bin/data
+build/*
+lib/*
+Testing/

@@ -11,33 +11,7 @@
 #include <functional>
 #include <iostream>
 
-template<class T>
-class Observer {
-public:
-    Observer() {}
-    virtual ~Observer() {}
-    virtual void notify() = 0;
-};
-
-template<class T>
-class Publisher {
-public:
-    Publisher() : observers() {}
-    virtual ~Publisher() {}
-
-    void attach(Observer<T>& obs)
-    {
-        observers.push_back(&obs);
-    }
-
-    void notify()
-    {
-        for (auto& obs : observers)
-            obs->notify();
-    }
-private:
-    std::vector<Observer<T> *> observers;
-};
+#include "model.h"
 
 class SDLBaseIO {
 public:
@@ -59,10 +33,17 @@ protected:
 };
 
 class Component;
+class ComponentContainer;
 class MenuComponent;
+class Button;
+class ModelView;
 
-class SDL_IO: public SDLBaseIO, public Publisher<SDL_IO> {
+class SDL_IO: public SDLBaseIO {
 public:
+    struct EventArgs {
+        int x, y;
+        bool buttonDown;
+    };
     template<typename T>
     using DeletedPointer = std::unique_ptr<T, std::function<void(T*)>>;
 
@@ -77,13 +58,28 @@ public:
     virtual ~SDL_IO();
 
     void loadImage(std::string imgPath, std::string imgKey);
+    RendererPointer createSoftwareRenderer(const Component& c);
+    RendererPointer createSoftwareRenderer(const std::unique_ptr<Component>& c);
+    RendererPointer createSoftwareRenderer();
     void renderImage(std::string key, int x, int y);
+    void renderImage(const SurfacePointer& p, std::string key, int x, int y);
     void updateScreen();
 
     void drawRectangle(int x1, int y1, int x2, int y2);
+    void drawRectangle(const RendererPointer& r, int x1, int y1, int x2, int y2);
     void drawRectangle(SurfacePointerBorrow s, int x1, int y1, int x2, int y2);
     void drawComponent(const Component& c);
-    void setColor(int rgba);
+    void drawComponent(const RendererPointer& r, const Component& c);
+    void drawLine(int x1, int y1, int x2, int y2);
+    void drawLine(const RendererPointer& r, int x1, int y1, int x2, int y2);
+    //void drawLines(std::vector<Vector3D> points);
+    void setColor(unsigned int rgba);
+    void setColor(const RendererPointer& rp, int r, int g, int b, int a);
+
+    const std::unique_ptr<ComponentContainer>& getRoot()
+    {
+        return rootComponent;
+    }
 
     bool handleEvents();
 
@@ -96,6 +92,8 @@ public:
     Uint32 getTicks();
 
     std::unique_ptr<MenuComponent> createMenuComponent(int x, int y, int width, int height);
+    std::unique_ptr<Button> createButton(int x, int y, int width, int height);
+    std::unique_ptr<ModelView> createModelView(int x, int y, int width, int height, Model& m);
 
 private:
     WindowPointer window;
@@ -103,14 +101,17 @@ private:
     TexturePointer screenTexture;
     SurfacePointer buffer;
 
+    std::unique_ptr<ComponentContainer> rootComponent;
+
     std::map<std::string, SDL_Surface *> texMap;
 
     int screenWidth;
     int screenHeight;
     Uint32 currentDrawColor;
 
+    std::vector<std::pair<SDL_Point, SDL_Point>> lineSegments;
+
     void CycleTexture();
 };
-
 
 #endif //IO_H
