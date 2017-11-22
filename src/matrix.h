@@ -23,7 +23,7 @@ public:
     Matrix& operator*=(const TransformationMatrix& rhs);
     bool operator==(const Matrix& other);
 
-    auto& getRows() const noexcept { return rows; }
+    auto& getRows() noexcept { return rows; }
 
     friend std::ostream& operator<<(std::ostream& os, const Matrix& m);
 

@@ -15,31 +15,38 @@ class Model {
 public:
     Model() = default;
 
-    Model(std::ifstream& pointFile, std::ifstream& lineFile) : currentCoords()
+    Model(std::string pf, std::string lf) : currentCoords()
     {
         std::string line;
+        std::ifstream pointFile(pf);
+        std::ifstream lineFile(lf);
+
         double cx, cy, cz;
         pointFile >> cx >> cy >> cz;
+
         if (pointFile) {
+            std::cout << "reading pointfile" << std::endl;
             double x, y, z;
             while (pointFile >> x >> y >> z) {
                 // TODO: this
-                currentCoords.addRow(Vector3D(x - cx, (y - cy) * -1, z - cz));
+                currentCoords.addRow(Vector3D(x - cx, y - cy, z - cz));
             }
+            std::cout << "read " << currentCoords.getRows().size() << " points" << std::endl;
         }
-        pointFile.close();
+
         if (lineFile) {
+            std::cout << "reading linefile" << std::endl;
             int l1, l2;
             while (lineFile >> l1 >> l2) {
                 lineSegments.push_back(std::make_pair(l1, l2));
             }
+            std::cout << "read " << lineSegments.size() << " segments" << std::endl;
         }
-        lineFile.close();
     }
 
     Model(Matrix c) : currentCoords(c), lineSegments() {}
     //const Matrix& getOriginalCoords() const noexcept { return originalCoords; }
-    const Matrix& getCurrentCoords() const noexcept { return currentCoords; }
+    Matrix& getCurrentCoords() noexcept { return currentCoords; }
     const std::vector<std::pair<int, int>>& getLineSegments() const noexcept { return lineSegments; }
 
     void applyTransformation(TransformationMatrix& m)

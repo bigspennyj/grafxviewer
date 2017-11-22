@@ -7,10 +7,10 @@
 
 class ModelView : public Component {
 public:
-    ModelView(int x_, int y_, int width_, int height_, const Model& model_,
+    ModelView(int x_, int y_, int width_, int height_, Model& model_,
             SDL_IO::SurfacePointer sp)
         : Component(x_, y_, width_, height_, std::move(sp)),
-        model(model_), unit(height_ / 60),
+        model(model_), unit(height_ / 30),
         activeTrans(), continuousTrans(), projectionMatrix(computeProjectionMatrix())
     {}
 
@@ -21,7 +21,7 @@ public:
     void applyContinuousTransformation(Matrix t);
 
 private:
-    const Model& model;
+    Model& model;
     double unit;
 
     TransformationMatrix computeProjectionMatrix();
