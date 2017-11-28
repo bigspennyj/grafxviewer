@@ -8,10 +8,11 @@ class App {
 private:
     std::unique_ptr<SDL_IO> io;
     bool run;
-    bool rotate;
+    bool rotateX, rotateY, rotateZ;
     Model model;
 
     void initUIComponents();
+    std::unique_ptr<MenuComponent> createAppMenu();
 
 public:
     App();
