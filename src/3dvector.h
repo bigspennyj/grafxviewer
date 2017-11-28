@@ -3,34 +3,111 @@
 
 #include <array>
 
-class Vector3D {
-public:
-    Vector3D() = default;
+template<typename U>
+struct TransformationMatrix;
 
-    Vector3D(double x, double y, double z) :
-        terms{{x, y, z, 1}}
-    {}
+template<typename T>
+struct Vector3D {
+    T x, y, z, h;
 
-    Vector3D(double x, double y, double z, double h) :
-        terms{{x, y, z, h}}
-    {}
+    T& operator[](int i) {
+        switch (i) {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        case 3:
+            return h;
+        default:
+            throw std::runtime_error("invalid index given to vector");
+        }
+    }
 
+    T operator[](int i) const {
+        switch (i) {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        case 3:
+            return h;
+        default:
+            throw std::runtime_error("invalid index given to vector");
+        }
+    }
 
-    double& operator[](int i) { return terms[i]; }
-    double operator[](int i) const { return terms[i]; }
+    template<typename Scalar>
+    Vector3D& operator*=(Scalar scalar)
+    {
+        x *= scalar;
+        y *= scalar;
+        z *= scalar;
+        return *this;
+    }
 
-    double getX() const noexcept { return terms[0]; }
-    double getY() const noexcept { return terms[1]; }
-    double getZ() const noexcept { return terms[2]; }
-    double getH() const noexcept { return terms[3]; }
+    template<typename Scalar>
+    Vector3D operator*(Scalar scalar)
+    {
+        Vector3D result(*this);
+        result *= scalar;
+        return result;
+    }
 
-    void setX(double x) noexcept { terms[0] = x; }
-    void setY(double y) noexcept { terms[1] = y; }
-    void setZ(double z) noexcept { terms[2] = z; }
-    void setH(double h) noexcept { terms[3] = h; }
+    template<typename U>
+    Vector3D operator*(const TransformationMatrix<U>& matrix)
+    {
+        Vector3D result(*this);
+        result *= matrix;
+        return result;
+    }
 
-private:
-    std::array<double, 4> terms;
+    template<typename U>
+    Vector3D& operator*=(const TransformationMatrix<U>& matrix)
+    {
+        std::array<T, 4> newTerms;
+        for (int i = 0; i < 4; i++) {
+            T newTerm = 0;
+            for (int j = 0; j < 4; j++) {
+                newTerm += (*this)[j] * matrix[j][i];
+            }
+            newTerms[i] = newTerm;
+        }
+        x = newTerms[0];
+        y = newTerms[1];
+        z = newTerms[2];
+        h = newTerms[3];
+
+        return *this;
+    }
+
+    template<typename U>
+    T operator*(const Vector3D<U>& rhs)
+    {
+        T result = (x * rhs.x) + (y * rhs.y) + (z * rhs.z);
+        return result;
+    }
+
+    template<typename U>
+    Vector3D& operator+=(const Vector3D<U>& rhs)
+    {
+        x += rhs.x;
+        y += rhs.y;
+        z += rhs.z;
+        return *this;
+    }
+
+    template<typename U>
+    Vector3D operator+(const Vector3D<U>& rhs)
+    {
+        Vector3D result(*this);
+        result += rhs;
+        return result;
+    }
+
 };
 
 #endif // VECTOR3D_H
