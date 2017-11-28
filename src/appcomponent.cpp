@@ -5,15 +5,15 @@ void MenuComponent::redraw(const DrawingContext& c)
 {
     //draw bg
     c.setColor(0x18, 0x13, 0x1B, 0xff);
-    c.drawRectangle(surface, 0, 0, width, height);
-    c.drawImage(surface, 0, 0, "menu-bg");
+    c.drawRectangle(0, 0, width, height);
+    c.drawImage("menu-bg", 0, 0);
     c.drawComponent(*this);
     needUpdate = false;
 }
 
 void Button::redraw(const DrawingContext& c)
 {
-    c.drawImage(surface, 0, 0, "button-up");
+    c.drawImage("button-up", 0, 0);
     c.drawComponent(*this);
     needUpdate = false;
 }

@@ -11,8 +11,8 @@ class Component {
 public:
     using ClickHandler = std::function<void(const SDL_IO::EventArgs&)>;
 
-    Component(int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer s) :
-        x(x_), y(y_), width(width_), height(height_), needUpdate(true), surface(std::move(s)) {}
+    Component(int x_, int y_, int width_, int height_, SDL_IO::TexturePointer s) :
+        x(x_), y(y_), width(width_), height(height_), needUpdate(true), texture(std::move(s)) {}
 
     virtual ~Component() { }
 
@@ -32,7 +32,7 @@ public:
     bool needsUpdate() const noexcept { return needUpdate; }
     void invalidate() noexcept { needUpdate = true; }
 
-    SDL_Surface *surfPointer() const noexcept { return surface.get(); };
+    SDL_Texture *texturePointer() const noexcept { return texture.get(); };
 
     template<typename Callable>
     void setClickHandler(Callable callback)
@@ -46,13 +46,13 @@ protected:
     bool AABB(const int x_, const int y_) const noexcept;
 
     ClickHandler onClickCallback;
-    SDL_IO::SurfacePointer surface;
+    SDL_IO::TexturePointer texture;
 
 };
 
 class ComponentContainer : public Component {
 public:
-    ComponentContainer(int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer s)
+    ComponentContainer(int x_, int y_, int width_, int height_, SDL_IO::TexturePointer s)
         : Component(x_, y_, width_, height_, std::move(s)) {}
 
     virtual ~ComponentContainer() {}

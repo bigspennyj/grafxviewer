@@ -8,8 +8,8 @@
 class ModelView : public Component {
 public:
     ModelView(int x_, int y_, int width_, int height_, Model& model_,
-            SDL_IO::SurfacePointer sp)
-        : Component(x_, y_, width_, height_, std::move(sp)),
+            SDL_IO::TexturePointer tex)
+        : Component(x_, y_, width_, height_, std::move(tex)),
         model(model_), unit(height_ / 30)
     {}
 
