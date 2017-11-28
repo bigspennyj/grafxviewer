@@ -30,6 +30,8 @@ void ComponentContainer::update(DrawingContext& c)
         c.setTarget(child);
         child->update(c);
     }
+
+    c.setTarget(nullptr);
 }
 
 bool ComponentContainer::handleEvent(const SDL_IO::EventArgs& e)

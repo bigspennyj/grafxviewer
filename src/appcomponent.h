@@ -8,8 +8,8 @@
 class Model;
 class Button : public Component {
 public:
-    Button(int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer sp)
-        : Component(x_, y_, width_, height_, std::move(sp)), buttonText(), currentColor(0xff000000), isPressed(false)
+    Button(int x_, int y_, int width_, int height_, SDL_IO::TexturePointer tex)
+        : Component(x_, y_, width_, height_, std::move(tex)), buttonText(), currentColor(0xff000000), isPressed(false)
     {
     }
     virtual ~Button() {}
@@ -26,8 +26,8 @@ private:
 
 class MenuComponent : public ComponentContainer {
 public:
-    MenuComponent(int x_, int y_, int width_, int height_, SDL_IO::SurfacePointer sp)
-        : ComponentContainer(x_, y_, width_, height_, std::move(sp))
+    MenuComponent(int x_, int y_, int width_, int height_, SDL_IO::TexturePointer tex)
+        : ComponentContainer(x_, y_, width_, height_, std::move(tex))
     {
     }
     virtual ~MenuComponent() {}

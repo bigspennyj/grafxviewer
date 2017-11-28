@@ -58,23 +58,20 @@ public:
     virtual ~SDL_IO();
 
     void loadImage(std::string imgPath, std::string imgKey);
-    RendererPointer createSoftwareRenderer(const Component& c);
-    RendererPointer createSoftwareRenderer(const std::unique_ptr<Component>& c);
-    RendererPointer createSoftwareRenderer();
     void renderImage(std::string key, int x, int y);
     void renderImage(const SurfacePointer& p, std::string key, int x, int y);
     void updateScreen();
 
     void drawRectangle(int x1, int y1, int x2, int y2);
-    void drawRectangle(const RendererPointer& r, int x1, int y1, int x2, int y2);
-    void drawRectangle(SurfacePointerBorrow s, int x1, int y1, int x2, int y2);
     void drawComponent(const Component& c);
-    void drawComponent(const RendererPointer& r, const Component& c);
+
     void drawLine(int x1, int y1, int x2, int y2);
-    void drawLine(const RendererPointer& r, int x1, int y1, int x2, int y2);
-    //void drawLines(std::vector<Vector3D> points);
+
     void setColor(unsigned int rgba);
-    void setColor(const RendererPointer& rp, int r, int g, int b, int a);
+    void setColor(int r, int g, int b, int a);
+
+    void setRenderTarget(const std::unique_ptr<Component>& c);
+    void setRenderTarget(const Component& c);
 
     const std::unique_ptr<ComponentContainer>& getRoot()
     {
@@ -98,12 +95,10 @@ public:
 private:
     WindowPointer window;
     RendererPointer renderer;
-    TexturePointer screenTexture;
-    SurfacePointer buffer;
 
     std::unique_ptr<ComponentContainer> rootComponent;
 
-    std::map<std::string, SDL_Surface *> texMap;
+    std::map<std::string, TexturePointer> texMap;
 
     int screenWidth;
     int screenHeight;
@@ -111,7 +106,6 @@ private:
 
     std::vector<std::pair<SDL_Point, SDL_Point>> lineSegments;
 
-    void CycleTexture();
 };
 
 #endif //IO_H
