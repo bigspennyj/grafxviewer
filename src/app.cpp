@@ -26,30 +26,82 @@ std::unique_ptr<MenuComponent> App::createAppMenu()
     auto button = io->createButton(20, 20, 40, 40);
     button->setClickHandler([this](auto& e) 
         { 
-            this->rotateX = !this->rotateX;
+            this->model.rotateModel(6, {1, 0, 0});
         });
     menu->addChild(std::move(button));
 
     auto button2 = io->createButton(80, 20, 40, 40);
     button2->setClickHandler([this](auto& e) 
         { 
-            this->rotateY = !this->rotateY;
+            this->model.rotateModel(6, {0, 1, 0});
         });
     menu->addChild(std::move(button2));
 
     auto button3 = io->createButton(140, 20, 40, 40);
     button3->setClickHandler([this](auto& e) 
         { 
-            this->rotateZ = !this->rotateZ;
+            this->model.rotateModel(6, {0, 0, 1});
         });
     menu->addChild(std::move(button3));
+
+    auto button4 = io->createButton(200, 20, 40, 40);
+    button4->setClickHandler([this](auto& e)
+        {
+            double inUnits = 75.0 / 20.0; //75 pixels in units
+            Vector3D<double> translation{ -inUnits, 0, 0, 0 };
+            this->model.translateModel(translation);
+        });
+    menu->addChild(std::move(button4));
+
+    auto button5 = io->createButton(260, 20, 40, 40);
+    button5->setClickHandler([this](auto& e)
+        {
+            double inUnits = 75.0 / 20.0; //75 pixels in units
+            Vector3D<double> translation{ inUnits, 0, 0, 0 };
+            this->model.translateModel(translation);
+        });
+    menu->addChild(std::move(button5));
+
+    auto button6 = io->createButton(320, 20, 40, 40);
+    button6->setClickHandler([this](auto& e)
+        {
+            double inUnits = 35.0 / 20.0; //35 pixels in units
+            Vector3D<double> translation{ 0, -inUnits, 0, 0 };
+            this->model.translateModel(translation);
+        });
+    menu->addChild(std::move(button6));
+
+    auto button7 = io->createButton(380, 20, 40, 40);
+    button7->setClickHandler([this](auto& e)
+        {
+            double inUnits = 35.0 / 20.0; //75 pixels in units
+            Vector3D<double> translation{ 0, inUnits, 0, 0 };
+            this->model.translateModel(translation);
+        });
+    menu->addChild(std::move(button7));
+
+    auto button8 = io->createButton(440, 20, 40, 40);
+    button8->setClickHandler([this](auto& e)
+        {
+            double scaleFactor = 1.1;
+            this->model.scaleModel(scaleFactor);
+        });
+    menu->addChild(std::move(button8));
+
+    auto button9 = io->createButton(500, 20, 40, 40);
+    button9->setClickHandler([this](auto& e)
+        {
+            double scaleFactor = 0.9;
+            this->model.scaleModel(scaleFactor);
+        });
+    menu->addChild(std::move(button9));
 
     return menu;
 }
 
 void App::initUIComponents()
 {
-    auto modelView = io->createModelView(0, 0, 1024, 688, model);
+    auto modelView = io->createModelView(0, 0, 1024, 688, 20, model);
     auto menu = createAppMenu();
 
     io->getRoot()->addChild(std::move(modelView));
@@ -69,7 +121,6 @@ int App::execute()
         run = io->handleEvents();
 
         if (rotateX) {
-            model.rotateModel(6, {1, 0, 0});
         }
 
         if (rotateY) {
