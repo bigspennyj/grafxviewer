@@ -1,38 +1,148 @@
 #ifndef MATRIX_H
 #define MATRIX_H
-#include <vector>
+
+#include <cmath>
+#include <array>
 #include "3dvector.h"
 
-class TransformationMatrix;
+#define PI 3.14159265
 
-class Matrix {
-public:
-    Matrix() = default;
+template<typename T>
+struct TransformationMatrix {
+    std::array<std::array<T, 4>, 4> matrix;
+    
+    std::array<T, 4> operator[](int i) const
+    {
+        return matrix[i];
+    }
 
-    Matrix(int n) : rows(n) {}
+    std::array<T, 4>& operator[](int i)
+    {
+        return matrix[i];
+    }
 
-    Matrix(std::vector<Vector3D>& r) : rows(r) {}
-    Matrix(std::initializer_list<Vector3D> r) : rows(r) {}
+    template<typename U>
+    bool operator==(const TransformationMatrix<U>& other)
+    {
+        for (int i = 0; i < matrix.size(); i++) {
+            for (int j = 0; j < 4; j++) {
+                if (matrix[i][j] != other.matrix[i][j])
+                    return false;
+            }
+        }
+        return true;
+    }
 
-    virtual void addRow(Vector3D&& row);
+    template<typename U>
+    TransformationMatrix operator*(const TransformationMatrix<U>& rhs)
+    {
+        TransformationMatrix result(*this);
+        result *= rhs;
+        return result;
+    }
 
-    Vector3D& operator[](int i);
+    template<typename U>
+    TransformationMatrix& operator*=(const TransformationMatrix<U>& rhs)
+    {
+        for (auto& row : matrix) {
+            std::array<T, 4> newRow;
+            for (int i = 0; i < 4; i++) {
+                double newTerm = 0;
+                for (int j = 0; j < 4; j++) {
+                    newTerm += row[j] * rhs[j][i];
+                }
+                newRow[i] = newTerm;
+            }
+            row = newRow;
+        }
 
-    const Vector3D& operator[](int i) const;
+        return *this;
+    }
 
-    Matrix& operator*=(const TransformationMatrix& rhs);
-    bool operator==(const Matrix& other);
+    static TransformationMatrix RotationMatrix(double degrees, const Vector3D<double>& axis)
+    {
+        double rads = PI * degrees / 180.0;
+        double sinTheta = sin(rads);
+        double cosTheta = cos(rads);
 
-    auto& getRows() noexcept { return rows; }
+        if (axis.x == 1.0) {
+            std::array<std::array<T, 4>, 4> points{{
+                {1, 0, 0, 0},
+                {0, cosTheta, -sinTheta, 0},
+                {0, sinTheta, cosTheta, 0},
+                {0, 0, 0, 1}
+            }};
+            return TransformationMatrix(points);
+        } else if (axis.y == 1.0) {
+            std::array<std::array<T, 4>, 4> points{{
+                {cosTheta, 0, -sinTheta, 0},
+                {0, 1, 0, 0},
+                {sinTheta, 0, cosTheta, 0},
+                {0, 0, 0, 1}
+            }};
+            return TransformationMatrix(points);
+        } else if (axis.z == 1.0) {
+            std::array<std::array<T, 4>, 4> points{{
+                {cosTheta, sinTheta, 0, 0},
+                {-sinTheta, cosTheta, 0, 0},
+                {0, 0, 1, 0},
+                {0, 0, 0, 1}
+            }};
+            return TransformationMatrix(points);
+        } else {
+            throw std::runtime_error("invalid rotation axis");
+        }
+    }
 
-    friend std::ostream& operator<<(std::ostream& os, const Matrix& m);
+    static TransformationMatrix ScaleMatrix(double factor, const Vector3D<double>& axis)
+    {
+        if (axis.x == 1.0) {
+            std::array<std::array<T, 4>, 4> points{{
+                {factor, 0, 0, 0},
+                {0, 1, 0, 0},
+                {0, 0, 1, 0},
+                {0, 0, 0, 1}
+            }};
+            return TransformationMatrix(points);
+        } else if (axis.y == 1.0) {
+            std::array<std::array<T, 4>, 4> points{{
+                {1, 0, 0, 0},
+                {0, factor, 0, 0},
+                {0, 0, 1, 0},
+                {0, 0, 0, 1}
+            }};
+            return TransformationMatrix(points);
+        } else if (axis.z == 1.0) {
+            std::array<std::array<T, 4>, 4> points{{
+                {1, 0, 0, 0},
+                {0, 1, 0, 0},
+                {0, 0, factor, 0},
+                {0, 0, 0, 1}
+            }};
+            return TransformationMatrix(points);
+        } else {
+            throw std::runtime_error("invalid scale axis");
+        }
+    }
 
-protected:
+    TransformationMatrix(std::array<std::array<T, 4>, 4> m) : matrix(m) {}
 
-    std::vector<Vector3D> rows;
+    static TransformationMatrix TranslationMatrix(const Vector3D<double>& transformation)
+    {
+        std::array<std::array<T, 4>, 4> m{{
+            {1, 0, 0, 0},
+            {0, 1, 0, 0},
+            {0, 0, 1, 0},
+            {transformation.x, transformation.y, transformation.z, 1}
+        }};
 
+        return TransformationMatrix(m);
+    }
+
+    //static TransformationMatrix SkewMatrix(double factor, const Vector3D<double>& axis)
 };
 
+/*
 class TransformationMatrix : public Matrix {
 public:
     TransformationMatrix() : Matrix(4)
@@ -41,16 +151,19 @@ public:
             rows[i][i] = 1;
     }
 
-    TransformationMatrix(std::initializer_list<Vector3D> r) : Matrix(r)
+    TransformationMatrix(std::initializer_list<Vector3D<double>> r) : Matrix(r)
     {
     }
-    virtual void addRow(Vector3D&& row) override 
+
+    static TransformationMatrix RotationMatrix(double degrees, const Vector3D<double>& axis);
+    static TransformationMatrix ScaleMatrix(double factor, const Vector3D<double>& axis);
+    static TransformationMatrix TranslationMatrix(const Vector3D<double>& transformation);
+    static TransformationMatrix SkewMatrix(double factor, const Vector3D<double>& axis);
+private:
+    virtual void addRow(Vector3D<double>&& row) override
     {
         throw std::runtime_error("Can't add row to tranformation matrix");
     }
-
-    void addTranslation(double x, double y, double z);
-    void addRotation(const Vector3D& vec);
 };
-
+*/
 #endif // MATRIX_H
