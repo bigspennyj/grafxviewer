@@ -4,7 +4,7 @@
 void ModelView::redraw(const DrawingContext& c)
 {
     //draw a darkbackground
-    c.setColor(0x18, 0x13, 0x1B, 0xff);
+    c.setColor(0x13, 0x13, 0x13, 0xff);
     c.drawRectangle(0, 0, width, height);
 
     auto projectionMatrix = computeProjectionMatrix();

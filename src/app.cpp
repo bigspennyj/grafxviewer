@@ -20,7 +20,8 @@ App::App(std::string pointFile, std::string lineFile) :
 std::unique_ptr<MenuComponent> App::createAppMenu()
 {
     io->loadImage("./assets/bg5.png", "menu-bg");
-    io->loadImage("./assets/button.png", "button-up");
+    io->loadImage("./assets/left-up.png", "button-up");
+    io->loadImage("./assets/left-down.png", "button-down");
     auto menu = io->createMenuComponent(0, 688, 1024, 80);
 
     auto button = io->createButton(20, 20, 40, 40);

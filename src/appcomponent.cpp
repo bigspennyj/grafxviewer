@@ -13,7 +13,7 @@ void MenuComponent::redraw(const DrawingContext& c)
 
 void Button::redraw(const DrawingContext& c)
 {
-    c.drawImage("button-up", 0, 0);
+    c.drawImage(currentImage, 0, 0);
     c.drawComponent(*this);
     needUpdate = false;
 }
@@ -23,7 +23,8 @@ bool Button::handleEvent(const SDL_IO::EventArgs& e)
     bool ourEvent = AABB(e.x, e.y);
     if (ourEvent && !isPressed) {
         //handle - we just got clicked
-        cycleColor();
+        currentImage = "button-down";
+        needUpdate = true;
         isPressed = true;
         if (onClickCallback) {
             onClickCallback(e);
@@ -32,7 +33,8 @@ bool Button::handleEvent(const SDL_IO::EventArgs& e)
 
     // always update if we're pressed and the button comes up
     if (!e.buttonDown && isPressed) {
-        cycleColor();
+        currentImage = "button-up";
+        needUpdate = true;
         isPressed = false;
     }
     return ourEvent;
