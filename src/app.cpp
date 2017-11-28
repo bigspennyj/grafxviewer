@@ -7,17 +7,17 @@
 
 App::App() :
     io(new SDL_IO(1024, 768)),
-    run(true), rotateX(false), rotateY(false), rotateZ(false), model()
+    run(true), rotate(false), model()
 {
 }
 
 App::App(std::string pointFile, std::string lineFile) :
     io(new SDL_IO(1024, 768)),
-    run(true), rotateX(false), rotateY(false), rotateZ(false), model(pointFile, lineFile)
+    run(true), rotate(false), model(pointFile, lineFile)
 {
 }
 
-std::unique_ptr<MenuComponent> App::createAppMenu()
+void App::initUIComponents()
 {
     io->loadImage("./assets/bg5.png", "menu-bg");
     io->loadImage("./assets/button.png", "button-up");
@@ -26,31 +26,12 @@ std::unique_ptr<MenuComponent> App::createAppMenu()
     auto button = io->createButton(20, 20, 40, 40);
     button->setClickHandler([this](auto& e) 
         { 
-            this->rotateX = !this->rotateX;
+            std::cout << "from the click handler!  got " << e.x << " " << e.y << std::endl; 
+            this->rotate = !this->rotate;
         });
     menu->addChild(std::move(button));
 
-    auto button2 = io->createButton(80, 20, 40, 40);
-    button2->setClickHandler([this](auto& e) 
-        { 
-            this->rotateY = !this->rotateY;
-        });
-    menu->addChild(std::move(button2));
-
-    auto button3 = io->createButton(140, 20, 40, 40);
-    button3->setClickHandler([this](auto& e) 
-        { 
-            this->rotateZ = !this->rotateZ;
-        });
-    menu->addChild(std::move(button3));
-
-    return menu;
-}
-
-void App::initUIComponents()
-{
     auto modelView = io->createModelView(0, 0, 1024, 688, model);
-    auto menu = createAppMenu();
 
     io->getRoot()->addChild(std::move(modelView));
     io->getRoot()->addChild(std::move(menu));
@@ -62,22 +43,20 @@ int App::execute()
 
     initUIComponents();
 
+    TransformationMatrix rotation = {
+        {0.9986, 0, 0.0523, 0},
+        {0, 1, 0, 0},
+        {-0.0523, 0, 0.9986, 0},
+        {0, 0, 0, 1}
+    };
     // menu and button are invalid
     while (run) {
         Uint32 startTicks = io->getTicks();
 
         run = io->handleEvents();
 
-        if (rotateX) {
-            model.rotateModel(6, {1, 0, 0});
-        }
-
-        if (rotateY) {
-            model.rotateModel(6, {0, 1, 0});
-        }
-
-        if (rotateZ) {
-            model.rotateModel(6, {0, 0, 1});
+        if (rotate) {
+            model.applyTransformation(rotation);
         }
 
         io->updateScreen();
