@@ -30,8 +30,10 @@ public:
             currentCenter = {cx, cy, cz, 1};
             double x, y, z;
             while (pointFile >> x >> y >> z) {
-                currentCoords.push_back({x, y, z, 1});
+                originalCoords.push_back({x, y, z, 1});
             }
+            currentCoords = originalCoords;
+
             if (lineFile) {
                 int l1, l2;
                 while (lineFile >> l1 >> l2) {
@@ -71,6 +73,8 @@ public:
     {
         auto transformation = TransformationMatrix<double>::TranslationMatrix(trans);
         applyTransformation(transformation);
+
+        currentCenter *= transformation;
     }
 
     void scaleModel(double factor, const Vector3D<double> trans)
@@ -88,17 +92,45 @@ public:
         applyTransformation(transformation);
     }
 
-    /*
-    void skewModel(double factor, const Vector3D<double> trans)
+    void scaleModel(double factor)
     {
-        auto transformation = TransformationMatrix::SkewMatrix(factor, trans);
+        auto initialTranslation = TransformationMatrix<double>::TranslationMatrix(
+                    {-currentCenter.x, -currentCenter.y, -currentCenter.z, 1});
+
+        auto returnTranslation = TransformationMatrix<double>::TranslationMatrix(
+            {currentCenter.x, currentCenter.y, currentCenter.z, 1});
+
+        auto scale = TransformationMatrix<double>::ScaleMatrix(factor);
+
+        auto transformation = initialTranslation * scale * returnTranslation;
+
         applyTransformation(transformation);
     }
-    */
+
+    void skewModelHorrizontally(double factor)
+    {
+        Vector3D<double> axis = {1, 0, 0, 0};
+        auto transformation = TransformationMatrix<double>::SkewMatrix(factor, axis);
+        applyTransformation(transformation);
+    }
+
+    void skewModelVertically(double factor)
+    {
+        Vector3D<double> axis = {0, 1, 0, 0};
+        auto transformation = TransformationMatrix<double>::SkewMatrix(factor, axis);
+        applyTransformation(transformation);
+    }
+
     void applyTransformation(const TransformationMatrix<double> m)
     {
         for (auto& row : currentCoords)
             row *= m;
+    }
+
+    void reset()
+    {
+        currentCoords = originalCoords;
+        currentCenter = originalCenter;
     }
 private:
     Vector3D<double> originalCenter;

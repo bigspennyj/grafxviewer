@@ -67,26 +67,26 @@ struct TransformationMatrix {
 
         if (axis.x == 1.0) {
             std::array<std::array<T, 4>, 4> points{{
-                {1, 0, 0, 0},
-                {0, cosTheta, -sinTheta, 0},
-                {0, sinTheta, cosTheta, 0},
-                {0, 0, 0, 1}
+                {{1, 0, 0, 0}},
+                {{0, cosTheta, -sinTheta, 0}},
+                {{0, sinTheta, cosTheta, 0}},
+                {{0, 0, 0, 1}}
             }};
             return TransformationMatrix(points);
         } else if (axis.y == 1.0) {
             std::array<std::array<T, 4>, 4> points{{
-                {cosTheta, 0, -sinTheta, 0},
-                {0, 1, 0, 0},
-                {sinTheta, 0, cosTheta, 0},
-                {0, 0, 0, 1}
+                {{cosTheta, 0, sinTheta, 0}},
+                {{0, 1, 0, 0}},
+                {{-sinTheta, 0, cosTheta, 0}},
+                {{0, 0, 0, 1}}
             }};
             return TransformationMatrix(points);
         } else if (axis.z == 1.0) {
             std::array<std::array<T, 4>, 4> points{{
-                {cosTheta, sinTheta, 0, 0},
-                {-sinTheta, cosTheta, 0, 0},
-                {0, 0, 1, 0},
-                {0, 0, 0, 1}
+                {{cosTheta, -sinTheta, 0, 0}},
+                {{sinTheta, cosTheta, 0, 0}},
+                {{0, 0, 1, 0}},
+                {{0, 0, 0, 1}}
             }};
             return TransformationMatrix(points);
         } else {
@@ -98,26 +98,26 @@ struct TransformationMatrix {
     {
         if (axis.x == 1.0) {
             std::array<std::array<T, 4>, 4> points{{
-                {factor, 0, 0, 0},
-                {0, 1, 0, 0},
-                {0, 0, 1, 0},
-                {0, 0, 0, 1}
+                {{factor, 0, 0, 0}},
+                {{0, 1, 0, 0}},
+                {{0, 0, 1, 0}},
+                {{0, 0, 0, 1}}
             }};
             return TransformationMatrix(points);
         } else if (axis.y == 1.0) {
             std::array<std::array<T, 4>, 4> points{{
-                {1, 0, 0, 0},
-                {0, factor, 0, 0},
-                {0, 0, 1, 0},
-                {0, 0, 0, 1}
+                {{1, 0, 0, 0}},
+                {{0, factor, 0, 0}},
+                {{0, 0, 1, 0}},
+                {{0, 0, 0, 1}}
             }};
             return TransformationMatrix(points);
         } else if (axis.z == 1.0) {
             std::array<std::array<T, 4>, 4> points{{
-                {1, 0, 0, 0},
-                {0, 1, 0, 0},
-                {0, 0, factor, 0},
-                {0, 0, 0, 1}
+                {{1, 0, 0, 0}},
+                {{0, 1, 0, 0}},
+                {{0, 0, factor, 0}},
+                {{0, 0, 0, 1}}
             }};
             return TransformationMatrix(points);
         } else {
@@ -125,45 +125,52 @@ struct TransformationMatrix {
         }
     }
 
+    static TransformationMatrix ScaleMatrix(double factor)
+    {
+        std::array<std::array<T, 4>, 4> points{{
+            {{factor, 0, 0, 0}},
+            {{0, factor, 0, 0}},
+            {{0, 0, factor, 0}},
+            {{0, 0, 0, 1}}
+        }};
+        return TransformationMatrix(points);
+    }
+
     TransformationMatrix(std::array<std::array<T, 4>, 4> m) : matrix(m) {}
 
     static TransformationMatrix TranslationMatrix(const Vector3D<double>& transformation)
     {
         std::array<std::array<T, 4>, 4> m{{
-            {1, 0, 0, 0},
-            {0, 1, 0, 0},
-            {0, 0, 1, 0},
-            {transformation.x, transformation.y, transformation.z, 1}
+            {{1, 0, 0, 0}},
+            {{0, 1, 0, 0}},
+            {{0, 0, 1, 0}},
+            {{transformation.x, transformation.y, transformation.z, 1}}
         }};
 
         return TransformationMatrix(m);
     }
 
-    //static TransformationMatrix SkewMatrix(double factor, const Vector3D<double>& axis)
-};
-
-/*
-class TransformationMatrix : public Matrix {
-public:
-    TransformationMatrix() : Matrix(4)
+    static TransformationMatrix SkewMatrix(double factor, const Vector3D<double>& axis)
     {
-        for (int i = 0; i < 4; i++)
-            rows[i][i] = 1;
-    }
-
-    TransformationMatrix(std::initializer_list<Vector3D<double>> r) : Matrix(r)
-    {
-    }
-
-    static TransformationMatrix RotationMatrix(double degrees, const Vector3D<double>& axis);
-    static TransformationMatrix ScaleMatrix(double factor, const Vector3D<double>& axis);
-    static TransformationMatrix TranslationMatrix(const Vector3D<double>& transformation);
-    static TransformationMatrix SkewMatrix(double factor, const Vector3D<double>& axis);
-private:
-    virtual void addRow(Vector3D<double>&& row) override
-    {
-        throw std::runtime_error("Can't add row to tranformation matrix");
+        if (axis.x == 1.0) {
+            std::array<std::array<T, 4>, 4> points{{
+                {{1, 0, 0, 0}},
+                {{factor, 1, 0, 0}},
+                {{0, 0, 1, 0}},
+                {{0, 0, 0, 1}}
+            }};
+            return TransformationMatrix(points);
+        } else if (axis.y == 1.0) {
+            std::array<std::array<T, 4>, 4> points{{
+                {{1, factor, 0, 0}},
+                {{0, 1, 0, 0}},
+                {{0, 0, 1, 0}},
+                {{0, 0, 0, 1}}
+            }};
+            return TransformationMatrix(points);
+        } else {
+            throw std::runtime_error("invalid scale axis");
+        }
     }
 };
-*/
 #endif // MATRIX_H
