@@ -25,7 +25,6 @@ public:
 
     virtual ~SDLBaseIO()
     {
-        std::cout << "~SDLBaseIO" << std::endl;
         SDL_Quit();
     }
 protected:
@@ -89,7 +88,7 @@ public:
     Uint32 getTicks();
 
     std::unique_ptr<MenuComponent> createMenuComponent(int x, int y, int width, int height);
-    std::unique_ptr<Button> createButton(int x, int y, int width, int height);
+    std::unique_ptr<Button> createButton(int x, int y, int width, int height, std::string imgKey);
     std::unique_ptr<ModelView> createModelView(int x, int y, int width, int height, int unit, Model& m);
 
 private:

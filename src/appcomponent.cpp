@@ -23,7 +23,7 @@ bool Button::handleEvent(const SDL_IO::EventArgs& e)
     bool ourEvent = AABB(e.x, e.y);
     if (ourEvent && !isPressed) {
         //handle - we just got clicked
-        currentImage = "button-down";
+        currentImage = imgKey + "-down";
         needUpdate = true;
         isPressed = true;
         if (onClickCallback) {
@@ -33,7 +33,7 @@ bool Button::handleEvent(const SDL_IO::EventArgs& e)
 
     // always update if we're pressed and the button comes up
     if (!e.buttonDown && isPressed) {
-        currentImage = "button-up";
+        currentImage = imgKey + "-up";
         needUpdate = true;
         isPressed = false;
     }
