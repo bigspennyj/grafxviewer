@@ -75,16 +75,16 @@ struct TransformationMatrix {
             return TransformationMatrix(points);
         } else if (axis.y == 1.0) {
             std::array<std::array<T, 4>, 4> points{{
-                {{cosTheta, 0, -sinTheta, 0}},
+                {{cosTheta, 0, sinTheta, 0}},
                 {{0, 1, 0, 0}},
-                {{sinTheta, 0, cosTheta, 0}},
+                {{-sinTheta, 0, cosTheta, 0}},
                 {{0, 0, 0, 1}}
             }};
             return TransformationMatrix(points);
         } else if (axis.z == 1.0) {
             std::array<std::array<T, 4>, 4> points{{
-                {{cosTheta, sinTheta, 0, 0}},
-                {{-sinTheta, cosTheta, 0, 0}},
+                {{cosTheta, -sinTheta, 0, 0}},
+                {{sinTheta, cosTheta, 0, 0}},
                 {{0, 0, 1, 0}},
                 {{0, 0, 0, 1}}
             }};
@@ -150,6 +150,27 @@ struct TransformationMatrix {
         return TransformationMatrix(m);
     }
 
-    //static TransformationMatrix SkewMatrix(double factor, const Vector3D<double>& axis)
+    static TransformationMatrix SkewMatrix(double factor, const Vector3D<double>& axis)
+    {
+        if (axis.x == 1.0) {
+            std::array<std::array<T, 4>, 4> points{{
+                {{1, 0, 0, 0}},
+                {{factor, 1, 0, 0}},
+                {{0, 0, 1, 0}},
+                {{0, 0, 0, 1}}
+            }};
+            return TransformationMatrix(points);
+        } else if (axis.y == 1.0) {
+            std::array<std::array<T, 4>, 4> points{{
+                {{1, factor, 0, 0}},
+                {{0, 1, 0, 0}},
+                {{0, 0, 1, 0}},
+                {{0, 0, 0, 1}}
+            }};
+            return TransformationMatrix(points);
+        } else {
+            throw std::runtime_error("invalid scale axis");
+        }
+    }
 };
 #endif // MATRIX_H

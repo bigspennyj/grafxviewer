@@ -50,7 +50,6 @@ bool ComponentContainer::handleEvent(const SDL_IO::EventArgs& e)
 bool ComponentContainer::handleMouseEvent(const SDL_IO::EventArgs& e)
 {
     if (AABB(e.x, e.y)) {
-        std::cout << "componentcontainer clicked" << std::endl;
         if (onClickCallback)
             onClickCallback(e);
         return true;

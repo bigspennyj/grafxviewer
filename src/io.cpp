@@ -61,7 +61,7 @@ std::unique_ptr<MenuComponent> SDL_IO::createMenuComponent(int x, int y, int w, 
             );
 }
 
-std::unique_ptr<Button> SDL_IO::createButton(int x, int y, int w, int h)
+std::unique_ptr<Button> SDL_IO::createButton(int x, int y, int w, int h, std::string imgKey)
 {
     TexturePointer tex(
             SDL_CreateTexture(renderer.get(), SDL_PIXELFORMAT_ARGB8888, 
@@ -70,7 +70,7 @@ std::unique_ptr<Button> SDL_IO::createButton(int x, int y, int w, int h)
             );
 
     return std::unique_ptr<Button>(
-            new Button(x, y, w, h, std::move(tex))
+            new Button(x, y, w, h, std::move(tex), imgKey)
             );
 }
 
@@ -212,5 +212,4 @@ void SDL_IO::doDelay(Uint32 ms)
 
 SDL_IO::~SDL_IO()
 {
-    std::cout << "~SDL_IO" << std::endl;
 }
