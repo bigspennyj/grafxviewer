@@ -9,7 +9,7 @@ class Model;
 class Button : public Component {
 public:
     Button(int x_, int y_, int width_, int height_, SDL_IO::TexturePointer tex)
-        : Component(x_, y_, width_, height_, std::move(tex)), buttonText(), currentColor(0xff000000), isPressed(false)
+        : Component(x_, y_, width_, height_, std::move(tex)), currentImage("button-up"), currentColor(0xff000000), isPressed(false)
     {
     }
     virtual ~Button() {}
@@ -19,7 +19,7 @@ public:
     void cycleColor() noexcept;
 
 private:
-    std::string buttonText;
+    std::string currentImage;
     long unsigned int currentColor;
     bool isPressed;
 };

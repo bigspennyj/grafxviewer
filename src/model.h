@@ -71,6 +71,8 @@ public:
     {
         auto transformation = TransformationMatrix<double>::TranslationMatrix(trans);
         applyTransformation(transformation);
+
+        currentCenter *= transformation;
     }
 
     void scaleModel(double factor, const Vector3D<double> trans)
@@ -82,6 +84,21 @@ public:
             {currentCenter.x, currentCenter.y, currentCenter.z, 1});
 
         auto scale = TransformationMatrix<double>::ScaleMatrix(factor, trans);
+
+        auto transformation = initialTranslation * scale * returnTranslation;
+
+        applyTransformation(transformation);
+    }
+
+    void scaleModel(double factor)
+    {
+        auto initialTranslation = TransformationMatrix<double>::TranslationMatrix(
+                    {-currentCenter.x, -currentCenter.y, -currentCenter.z, 1});
+
+        auto returnTranslation = TransformationMatrix<double>::TranslationMatrix(
+            {currentCenter.x, currentCenter.y, currentCenter.z, 1});
+
+        auto scale = TransformationMatrix<double>::ScaleMatrix(factor);
 
         auto transformation = initialTranslation * scale * returnTranslation;
 

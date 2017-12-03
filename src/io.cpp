@@ -74,7 +74,7 @@ std::unique_ptr<Button> SDL_IO::createButton(int x, int y, int w, int h)
             );
 }
 
-std::unique_ptr<ModelView> SDL_IO::createModelView(int x, int y, int w, int h, Model& m)
+std::unique_ptr<ModelView> SDL_IO::createModelView(int x, int y, int w, int h, int u, Model& m)
 {
     TexturePointer tex(
             SDL_CreateTexture(renderer.get(), SDL_PIXELFORMAT_ARGB8888, 
@@ -83,7 +83,7 @@ std::unique_ptr<ModelView> SDL_IO::createModelView(int x, int y, int w, int h, M
             );
 
     return std::unique_ptr<ModelView>(
-            new ModelView(x, y, w, h, m, std::move(tex))
+            new ModelView(x, y, w, h, u, m, std::move(tex))
             );
 }
 
