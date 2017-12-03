@@ -1,8 +1,4 @@
-bin/*.o
-bin/gfxv
-bin/gfxv-test
-bin/assets
-bin/data
+bin/*
 build/*
 lib/*
 Testing/
