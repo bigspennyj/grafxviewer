@@ -24,28 +24,30 @@ bool Component::AABB(const int x_, const int y_) const noexcept
 //------------------------------------------------------------------------------
 void ComponentContainer::update(DrawingContext& c)
 {
-    Component::update(c);
+    if (visible) {
+        Component::update(c);
 
-    for (const auto& child : children) {
-        c.setTarget(child);
-        child->update(c);
+        for (const auto& child : children) {
+            c.setTarget(child);
+            child->update(c);
+        }
+
+        c.setTarget(nullptr);
     }
-
-    c.setTarget(nullptr);
 }
 
 bool ComponentContainer::handleEvent(const SDL_IO::EventArgs& e)
 {
-    for (const auto& child : children) {
-        if (child->handleEvent(e))
+    if (visible) {
+        for (const auto& child : children) {
+            if (child->handleEvent(e))
+                return true;
+        }
+        if (handleMouseEvent(e))
             return true;
     }
-    if (handleMouseEvent(e))
-        return true;
     return false;
 }
-
-
 
 bool ComponentContainer::handleMouseEvent(const SDL_IO::EventArgs& e)
 {

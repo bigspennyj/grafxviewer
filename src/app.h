@@ -10,6 +10,7 @@ private:
     bool run;
     bool rotateX, rotateY, rotateZ;
     Model model;
+    bool showFileDialog;
 
     void initUIComponents();
     std::unique_ptr<MenuComponent> createAppMenu();

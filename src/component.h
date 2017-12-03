@@ -12,7 +12,7 @@ public:
     using ClickHandler = std::function<void(const SDL_IO::EventArgs&)>;
 
     Component(int x_, int y_, int width_, int height_, SDL_IO::TexturePointer s) :
-        x(x_), y(y_), width(width_), height(height_), needUpdate(true), texture(std::move(s)) {}
+        x(x_), y(y_), width(width_), height(height_), needUpdate(true), visible(true), texture(std::move(s)) {}
 
     virtual ~Component() { }
 
@@ -30,10 +30,13 @@ public:
     void setWidth(int width_) noexcept { x = width_; }
     void setHeight(int height_) noexcept { x = height_; }
     bool needsUpdate() const noexcept { return needUpdate; }
-    void invalidate() noexcept { needUpdate = true; }
+    void invalidate() { needUpdate = true; }
 
+    virtual void setVisible(bool v) noexcept { visible = v; }
+    bool isVisible() const noexcept { return visible; }
     SDL_Texture *texturePointer() const noexcept { return texture.get(); };
 
+    // wtf is this?
     template<typename Callable>
     void setClickHandler(Callable callback)
     {
@@ -44,6 +47,7 @@ protected:
     int x, y, width, height;
     bool needUpdate;
     bool AABB(const int x_, const int y_) const noexcept;
+    bool visible;
 
     ClickHandler onClickCallback;
     SDL_IO::TexturePointer texture;
@@ -53,7 +57,7 @@ protected:
 class ComponentContainer : public Component {
 public:
     ComponentContainer(int x_, int y_, int width_, int height_, SDL_IO::TexturePointer s)
-        : Component(x_, y_, width_, height_, std::move(s)) {}
+        : Component(x_, y_, width_, height_, std::move(s)), children() { children.reserve(10); }
 
     virtual ~ComponentContainer() {}
 
@@ -61,6 +65,16 @@ public:
     virtual void redraw(const DrawingContext&) override {}
 
     virtual bool handleEvent(const SDL_IO::EventArgs& e) override;
+
+    virtual void setVisible(bool v) noexcept override
+    {
+        visible = v;
+        for (auto& component : children) {
+            component->setVisible(v);
+            component->invalidate();
+        }
+        invalidate();
+    }
 
     template<typename T>
     const std::unique_ptr<Component>& addChild(std::unique_ptr<T> c)
@@ -74,6 +88,7 @@ public:
 
         return children.back();
     }
+
 protected:
     std::vector<std::unique_ptr<Component>> children;
     virtual bool handleMouseEvent(const SDL_IO::EventArgs& e);

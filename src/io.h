@@ -37,6 +37,7 @@ class ComponentContainer;
 class MenuComponent;
 class Button;
 class ModelView;
+class FileSelectorComponent;
 
 class SDL_IO: public SDLBaseIO {
 public:
@@ -88,9 +89,10 @@ public:
     void doDelay(Uint32 ms);
     Uint32 getTicks();
 
-    std::unique_ptr<MenuComponent> createMenuComponent(int x, int y, int width, int height);
-    std::unique_ptr<Button> createButton(int x, int y, int width, int height);
-    std::unique_ptr<ModelView> createModelView(int x, int y, int width, int height, int unit, Model& m);
+    std::unique_ptr<MenuComponent> createMenuComponent(int x, int y, int width, int height) const;
+    std::unique_ptr<Button> createButton(int x, int y, int width, int height) const;
+    std::unique_ptr<ModelView> createModelView(int x, int y, int width, int height, int unit, Model& m) const;
+    std::unique_ptr<FileSelectorComponent> createFileSelector(int x, int y, int w, int h) const;
 
 private:
     WindowPointer window;

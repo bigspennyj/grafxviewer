@@ -48,10 +48,10 @@ void SDL_IO::drawLine(int x1, int y1, int x2, int y2)
     SDL_RenderDrawLine(renderer.get(), x1, y1, x2, y2);
 }
 
-std::unique_ptr<MenuComponent> SDL_IO::createMenuComponent(int x, int y, int w, int h)
+std::unique_ptr<MenuComponent> SDL_IO::createMenuComponent(int x, int y, int w, int h) const
 {
     TexturePointer tex(
-            SDL_CreateTexture(renderer.get(), SDL_PIXELFORMAT_ARGB8888, 
+            SDL_CreateTexture(renderer.get(), SDL_PIXELFORMAT_ARGB8888,
                 SDL_TEXTUREACCESS_TARGET, w, h),
             SDL_DestroyTexture
             );
@@ -61,10 +61,10 @@ std::unique_ptr<MenuComponent> SDL_IO::createMenuComponent(int x, int y, int w, 
             );
 }
 
-std::unique_ptr<Button> SDL_IO::createButton(int x, int y, int w, int h)
+std::unique_ptr<Button> SDL_IO::createButton(int x, int y, int w, int h) const
 {
     TexturePointer tex(
-            SDL_CreateTexture(renderer.get(), SDL_PIXELFORMAT_ARGB8888, 
+            SDL_CreateTexture(renderer.get(), SDL_PIXELFORMAT_ARGB8888,
                 SDL_TEXTUREACCESS_TARGET, w, h),
             SDL_DestroyTexture
             );
@@ -74,10 +74,10 @@ std::unique_ptr<Button> SDL_IO::createButton(int x, int y, int w, int h)
             );
 }
 
-std::unique_ptr<ModelView> SDL_IO::createModelView(int x, int y, int w, int h, int u, Model& m)
+std::unique_ptr<ModelView> SDL_IO::createModelView(int x, int y, int w, int h, int u, Model& m) const
 {
     TexturePointer tex(
-            SDL_CreateTexture(renderer.get(), SDL_PIXELFORMAT_ARGB8888, 
+            SDL_CreateTexture(renderer.get(), SDL_PIXELFORMAT_ARGB8888,
                 SDL_TEXTUREACCESS_TARGET, w, h),
             SDL_DestroyTexture
             );
@@ -87,6 +87,18 @@ std::unique_ptr<ModelView> SDL_IO::createModelView(int x, int y, int w, int h, i
             );
 }
 
+std::unique_ptr<FileSelectorComponent> SDL_IO::createFileSelector(int x, int y, int w, int h) const
+{
+    TexturePointer tex(
+            SDL_CreateTexture(renderer.get(), SDL_PIXELFORMAT_ARGB8888,
+                SDL_TEXTUREACCESS_TARGET, w, h),
+            SDL_DestroyTexture
+            );
+
+    return std::unique_ptr<FileSelectorComponent>(
+            new FileSelectorComponent(*this, x, y, w, h, std::move(tex))
+            );
+}
 int SDL_IO::getWidth() const noexcept
 {
     return screenWidth;

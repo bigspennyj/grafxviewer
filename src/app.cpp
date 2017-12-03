@@ -7,13 +7,13 @@
 
 App::App() :
     io(new SDL_IO(1024, 768)),
-    run(true), rotateX(false), rotateY(false), rotateZ(false), model()
+    run(true), rotateX(false), rotateY(false), rotateZ(false), model(), showFileDialog(false)
 {
 }
 
 App::App(std::string pointFile, std::string lineFile) :
     io(new SDL_IO(1024, 768)),
-    run(true), rotateX(false), rotateY(false), rotateZ(false), model(pointFile, lineFile)
+    run(true), rotateX(false), rotateY(false), rotateZ(false), model(pointFile, lineFile), showFileDialog(false)
 {
 }
 
@@ -97,29 +97,47 @@ std::unique_ptr<MenuComponent> App::createAppMenu()
         });
     menu->addChild(std::move(button9));
 
+    auto button10 = io->createButton(560, 20, 40, 40);
+    button10->setClickHandler([this](auto& e)
+        {
+            std::cout << "toggling file dialog" << std::endl;
+            this->showFileDialog = !this->showFileDialog;
+        });
+    menu->addChild(std::move(button10));
     return menu;
-}
-
-void App::initUIComponents()
-{
-    auto modelView = io->createModelView(0, 0, 1024, 688, 20, model);
-    auto menu = createAppMenu();
-
-    io->getRoot()->addChild(std::move(modelView));
-    io->getRoot()->addChild(std::move(menu));
 }
 
 int App::execute()
 {
     Uint32 delayTime = (1.0 / FRAME_RATE) * 1000;
 
-    initUIComponents();
+    auto modelView = io->createModelView(0, 0, 1024, 688, 20, model);
+    auto menu = createAppMenu();
+
+    const auto& modelViewRef = io->getRoot()->addChild(std::move(modelView));
+    io->getRoot()->addChild(std::move(menu));
+
+    //testing file dialog code
+    auto fileSelector = io->createFileSelector((1024 / 2) - 200, (768 / 2) - 250, 400, 500); 
+    fileSelector->setOnCloseCallback([&](auto& points, auto& lines)
+        {
+            std::cout << "points: " << points << "lines: " << lines << std::endl;
+            this->showFileDialog = false;
+        });
+    auto& fileSelectorRef = io->getRoot()->addChild(std::move(fileSelector));
 
     // menu and button are invalid
     while (run) {
         Uint32 startTicks = io->getTicks();
 
         run = io->handleEvents();
+
+        if (showFileDialog) {
+            fileSelectorRef->setVisible(true);
+        } else {
+            fileSelectorRef->setVisible(false);
+            modelViewRef->invalidate();
+        }
 
         if (rotateX) {
         }

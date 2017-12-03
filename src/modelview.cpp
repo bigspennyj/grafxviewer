@@ -34,28 +34,15 @@ void ModelView::redraw(const DrawingContext& c)
         int y = row.y - 1;
         c.drawRectangle(x, y, 3, 3);
     }
-
     c.drawComponent(*this);
+    needUpdate = false;
 }
 
 TransformationMatrix<double> ModelView::computeProjectionMatrix()
 {
-    /*
-    Vector3D ourPosition(0, 0, -100);
-
-    //i think this stuff is all right?
-    Vector3D nHat(0, 0, -1);
-
-    // up should just be 0 1 0, right?
-    Vector3D uHat(0, 1, 0);
-
-    // and vHat is just going to be 1 0 1 right?
-    Vector3D vHat(1, 0, 0);
-    */
     double widthTranslation = (width / 2.0) - (model.getOriginalCenter().x * unit);
     double heightTranslation = (height / 2.0) + (model.getOriginalCenter().y * unit);
 
-    // so to get the whole thing, we do some stuff
     std::array<std::array<double, 4>, 4> m{{
         {{unit, 0, 0, 0}},
         {{0, -unit, 0, 0}},

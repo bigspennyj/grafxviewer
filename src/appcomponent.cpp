@@ -45,3 +45,26 @@ void Button::cycleColor() noexcept
     currentColor = (~currentColor) | 0xff000000;
     needUpdate = true;
 }
+
+void FileSelectorComponent::redraw(const DrawingContext& c)
+{
+    if (visible) {
+        c.setColor(0xaa, 0x10, 0x10, 0xff);
+        c.drawRectangle(0, 0, width, height);
+        c.drawComponent(*this);
+        needUpdate = false;
+    }
+}
+
+void FileSelectorComponent::initComponent(const SDL_IO& io)
+{
+    visible = false;
+    auto closeButton = io.createButton(width - 60, height - 60, 40, 40);
+    closeButton->setClickHandler([this](auto& e)
+        {
+            std::string points = "data/future_fighterjet.points";
+            std::string lines = "data/future_fighterjet.lines";
+            this->callback(points, lines);
+        });
+    addChild(std::move(closeButton));
+}
