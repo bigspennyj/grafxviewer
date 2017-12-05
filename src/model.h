@@ -27,11 +27,13 @@ public:
 
         if (pointFile) {
             originalCenter = {cx, cy, cz, 1};
-            currentCenter = {cx, cy, cz, 1};
+            currentCenter = originalCenter;
+            scaledCenter = originalCenter;
+
             double x, y, z;
-            while (pointFile >> x >> y >> z) {
+            while (pointFile >> x >> y >> z)
                 originalCoords.push_back({x, y, z, 1});
-            }
+
             currentCoords = originalCoords;
 
             if (lineFile) {
@@ -90,6 +92,7 @@ public:
         auto transformation = initialTranslation * scale * returnTranslation;
 
         applyTransformation(transformation);
+        scaledCenter *= scale;
     }
 
     void scaleModel(double factor)
@@ -105,19 +108,36 @@ public:
         auto transformation = initialTranslation * scale * returnTranslation;
 
         applyTransformation(transformation);
+        scaledCenter *= scale;
     }
 
     void skewModelHorrizontally(double factor)
     {
         Vector3D<double> axis = {1, 0, 0, 0};
-        auto transformation = TransformationMatrix<double>::SkewMatrix(factor, axis);
+        auto initialTranslation = TransformationMatrix<double>::TranslationMatrix(
+                {0, -currentCenter.y + scaledCenter.y, 0, 1});
+
+        auto returnTranslation = TransformationMatrix<double>::TranslationMatrix(
+                {0, currentCenter.y - scaledCenter.y, 0, 1});
+
+        auto skew = TransformationMatrix<double>::SkewMatrix(factor, axis);
+        auto transformation = initialTranslation * skew * returnTranslation;
+
         applyTransformation(transformation);
     }
 
     void skewModelVertically(double factor)
     {
         Vector3D<double> axis = {0, 1, 0, 0};
-        auto transformation = TransformationMatrix<double>::SkewMatrix(factor, axis);
+        auto initialTranslation = TransformationMatrix<double>::TranslationMatrix(
+                {-currentCenter.x + scaledCenter.x, 0, 0, 1});
+
+        auto returnTranslation = TransformationMatrix<double>::TranslationMatrix(
+                {currentCenter.x - scaledCenter.x, 0, 0, 1});
+
+        auto skew = TransformationMatrix<double>::SkewMatrix(factor, axis);
+        auto transformation = initialTranslation * skew * returnTranslation;
+
         applyTransformation(transformation);
     }
 
@@ -131,10 +151,12 @@ public:
     {
         currentCoords = originalCoords;
         currentCenter = originalCenter;
+        scaledCenter = currentCenter;
     }
 private:
     Vector3D<double> originalCenter;
     Vector3D<double> currentCenter;
+    Vector3D<double> scaledCenter;
 
     std::vector<Vector3D<double>> currentCoords;
     std::vector<Vector3D<double>> originalCoords;
