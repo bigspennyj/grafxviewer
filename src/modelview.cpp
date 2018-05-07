@@ -40,18 +40,6 @@ void ModelView::redraw(const DrawingContext& c)
 
 TransformationMatrix<double> ModelView::computeProjectionMatrix()
 {
-    /*
-    Vector3D ourPosition(0, 0, -100);
-
-    //i think this stuff is all right?
-    Vector3D nHat(0, 0, -1);
-
-    // up should just be 0 1 0, right?
-    Vector3D uHat(0, 1, 0);
-
-    // and vHat is just going to be 1 0 1 right?
-    Vector3D vHat(1, 0, 0);
-    */
     double widthTranslation = (width / 2.0) - (model.getOriginalCenter().x * unit);
     double heightTranslation = (height / 2.0) + (model.getOriginalCenter().y * unit);
 
